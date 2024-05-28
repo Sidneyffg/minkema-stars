@@ -1,13 +1,12 @@
 class GameRenderer {
   /**
    * @param {Renderer} renderer
-   * @param {AssetsHandler} assetsHandler
    */
-  constructor(renderer, assetsHandler, keyHandler) {
+  constructor(renderer) {
     this.renderer = renderer;
-    this.assetsHandler = assetsHandler;
-    this.keyHandler = keyHandler;
-    renderer.onResize((w, h) => this.#updateTileData(w, h));
+    renderer.onResize((w, h) => {
+      this.tileRenderer.updateTileData(w, h);
+    });
   }
   pos = { x: 0, y: 0 };
   tiles = [
@@ -23,40 +22,13 @@ class GameRenderer {
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   ];
 
-  render() {
+  render(ctx) {
     this.updatePos();
-
-    const centerPos = {
-      x: this.renderer.canvas.width * 0.5,
-      y: this.renderer.canvas.height * 0.5,
-    };
-
-    for (let i = 0; i < this.tiles.length; i++) {
-      for (let j = 0; j < this.tiles[0].length; j++) {
-        this.drawTileCenter(
-          {
-            x: centerPos.x + (j - this.pos.x) * this.tileSize,
-            y: centerPos.y + (i - this.pos.y) * this.tileSize,
-          },
-          this.tiles[i][j]
-        );
-      }
-    }
-  }
-
-  drawTileCenter(pos, tileId) {
-    const img = this.assetsHandler.assets[["tile_orange", "tile_red"][tileId]];
-    this.renderer.context.drawImage(
-      img,
-      pos.x - this.halftileSize,
-      pos.y - this.halftileSize,
-      this.tileSize,
-      this.tileSize
-    );
+    this.tileRenderer.render(ctx, this.tiles, this.pos);
   }
 
   updatePos() {
-    const heldDownKeys = this.keyHandler.heldDownKeys;
+    const heldDownKeys = KeyHandler.heldDownKeys;
     const xMov =
       heldDownKeys.includes("d") * 1 - heldDownKeys.includes("a") * 1;
     const yMov =
@@ -81,45 +53,79 @@ class GameRenderer {
         }
       }
 
-      const movPos = this.utils.angleToCoords(angle, this.baseSpeed);
+      const movPos = Utils.angleToCoords(angle, this.baseSpeed);
       this.pos.x += movPos.x;
       this.pos.y += movPos.y;
     }
   }
 
-  #updateTileData(screenWidth, screenHeight) {
+  baseSpeed = 0.1;
+  tileRenderer = new TileRenderer();
+}
+
+class TileRenderer {
+  /**
+   * @param {GameRenderer} gameRenderer
+   */
+  constructor(gameRenderer) {
+    this.gameRenderer = gameRenderer;
+  }
+  render(ctx, tiles, pos) {
+    const centerPos = {
+      x: this.screenWidth * 0.5,
+      y: this.screenHeight * 0.5,
+    };
+
+    for (let i = 0; i < tiles.length; i++) {
+      for (let j = 0; j < tiles[0].length; j++) {
+        this.drawTileCenter(
+          ctx,
+          {
+            x: centerPos.x + (j - pos.x) * this.tileSize,
+            y: centerPos.y + (i - pos.y) * this.tileSize,
+          },
+          tiles[i][j]
+        );
+      }
+    }
+  }
+
+  drawTileCenter(ctx, pos, tileId) {
+    const img = Assets.assets[["tile_orange", "tile_red"][tileId]];
+    ctx.drawImage(
+      img,
+      pos.x - this.halftileSize,
+      pos.y - this.halftileSize,
+      this.tileSize,
+      this.tileSize
+    );
+  }
+
+  updateTileData(screenWidth, screenHeight) {
     this.tileSize = Math.ceil(screenWidth / this.tilesWidth);
     this.halftileSize = this.tileSize / 2;
-    this.shownTilesHeight = screenHeight / this.tileSize;
-    this.halfShownTilesHeight = this.shownTilesHeight / 2;
-    this.tilesHeight = Math.ceil(this.shownTilesHeight);
-    this.halfTilesHeight = this.tilesHeight / 2;
-    this.halfOffScreenHeight = this.halfTilesHeight - this.halfShownTilesHeight;
+    this.screenWidth = screenWidth;
+    this.screenHeight = screenHeight;
   }
   tileSize;
   halfTileSize;
-  shownTilesHeight;
-  halfShownTilesHeight;
-  tilesHeight;
-  halfTilesHeight;
+  screenWidth;
+  screenHeight;
   tilesWidth = 20;
-  halfTilesWidth = this.tilesWidth / 2;
-  utils = new Utils();
-  baseSpeed = 0.1;
 }
 
 class Utils {
-  getFractionFromWhole(num) {
+  static getFractionFromWhole(num) {
     return num - Math.round(num);
   }
-  angleToCoords(angle, speed) {
-    angle = this.toRadians(angle);
+  static angleToCoords(angle, speed) {
+    angle = Utils.toRadians(angle);
     return {
       x: speed * Math.sin(angle),
       y: speed * -Math.cos(angle),
     };
   }
-  toRadians(angle) {
+  static toRadians(angle) {
     return angle * (Math.PI / 180);
   }
 }

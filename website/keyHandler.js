@@ -1,20 +1,20 @@
 class KeyHandler {
-  constructor() {
-    this.listenKeyDown();
-    this.listenKeyUp();
+  static init() {
+    KeyHandler.listenKeyDown();
+    KeyHandler.listenKeyUp();
   }
-  listenKeyDown() {
+  static listenKeyDown() {
     window.addEventListener("keydown", (e) => {
-      if (this.heldDownKeys.includes(e.key)) return;
-      this.heldDownKeys.push(e.key);
+      if (KeyHandler.heldDownKeys.includes(e.key)) return;
+      KeyHandler.heldDownKeys.push(e.key);
     });
   }
-  listenKeyUp() {
+  static listenKeyUp() {
     window.addEventListener("keyup", (e) => {
-      if (!this.heldDownKeys.includes(e.key)) return;
-      const idx = this.heldDownKeys.indexOf(e.key);
-      this.heldDownKeys.splice(idx, 1);
+      if (!KeyHandler.heldDownKeys.includes(e.key)) return;
+      const idx = KeyHandler.heldDownKeys.indexOf(e.key);
+      KeyHandler.heldDownKeys.splice(idx, 1);
     });
   }
-  heldDownKeys = [];
+  static heldDownKeys = [];
 }

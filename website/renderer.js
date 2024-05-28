@@ -1,15 +1,10 @@
 class Renderer {
   async init() {
     const socket = io();
-    this.keyHandler = new KeyHandler();
-    this.assetsHandler = new AssetsHandler();
-    await this.assetsHandler.init();
+    KeyHandler.init();
+    await Assets.init();
 
-    this.gameRenderer = new GameRenderer(
-      this,
-      this.assetsHandler,
-      this.keyHandler
-    );
+    this.gameRenderer = new GameRenderer(this);
 
     this.windowResize();
     window.onresize = () => {
@@ -23,9 +18,10 @@ class Renderer {
     requestAnimationFrame(() => {
       this.renderFrame();
     });
+    Time.nextFrame();
     this.clearCanvas();
-    this.gameRenderer.render();
-    this.context.fillRect(
+    this.gameRenderer.render(this.ctx);
+    this.ctx.fillRect(
       this.canvas.width / 2 - 5,
       this.canvas.height / 2 - 5,
       10,
@@ -34,7 +30,7 @@ class Renderer {
   }
 
   clearCanvas() {
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
   windowResize() {
@@ -52,7 +48,7 @@ class Renderer {
 
   renderers;
   canvas = document.querySelector("canvas");
-  context = this.canvas.getContext("2d");
+  ctx = this.canvas.getContext("2d");
 }
 
 const renderer = new Renderer();
