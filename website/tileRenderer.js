@@ -10,30 +10,19 @@ class TileRenderer {
   }
 
   render(pos, tiles) {
-    const offset = {
-      x: getFractionFromWhole(pos.x),
-      y: getFractionFromWhole(pos.y) - this.halfOffScreenHeight,
+    const centerPos = {
+      x: this.renderer.canvas.width * 0.5,
+      y: this.renderer.canvas.height * 0.5,
     };
-    pos = { x: Math.round(pos.x), y: Math.round(pos.y) };
-    for (let i = 0; i < this.tilesHeight + 1; i++) {
-      for (let j = 0; j < this.tilesWidth + 1; j++) {
-        const tilePos = {
-          x: j + pos.x - Math.round(this.halfTilesWidth),
-          y: i + pos.y - Math.round(this.halfShownTilesHeight),
-        };
-        if (
-          tilePos.x < 0 ||
-          tilePos.x >= tiles.length ||
-          tilePos.y < 0 ||
-          tilePos.y >= tiles[0].length
-        )
-          continue;
+
+    for (let i = 0; i < tiles.length; i++) {
+      for (let j = 0; j < tiles[0].length; j++) {
         this.drawTileCenter(
           {
-            x: tilePos.x + offset.x,
-            y: tilePos.y + offset.y,
+            x: centerPos.x + (j - pos.x) * this.tileSize,
+            y: centerPos.y + (i - pos.y) * this.tileSize,
           },
-          tiles[tilePos.x][tilePos.y]
+          tiles[i][j]
         );
       }
     }
@@ -43,8 +32,8 @@ class TileRenderer {
     const img = this.assetsHandler.assets[["tile_orange", "tile_red"][tileId]];
     this.renderer.context.drawImage(
       img,
-      pos.x * this.tileSize - this.halftileSize,
-      pos.y * this.tileSize - this.halftileSize,
+      pos.x - this.halftileSize,
+      pos.y - this.halftileSize,
       this.tileSize,
       this.tileSize
     );
@@ -65,7 +54,7 @@ class TileRenderer {
   halfShownTilesHeight;
   tilesHeight;
   halfTilesHeight;
-  tilesWidth = 10;
+  tilesWidth = 100;
   halfTilesWidth = this.tilesWidth / 2;
 }
 

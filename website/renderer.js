@@ -1,16 +1,16 @@
 class Renderer {
   async init() {
+    this.keyHandler = new KeyHandler();
     this.assetsHandler = new AssetsHandler();
     await this.assetsHandler.init();
 
-    // Renderers in order from bottom to top of screen
     this.tileRenderer = new TileRenderer(this, this.assetsHandler);
 
     this.windowResize();
     window.onresize = () => {
       this.windowResize();
     };
-
+    this.pos = { x: 0, y: 0 };
     this.renderFrame();
   }
 
@@ -19,7 +19,11 @@ class Renderer {
       this.renderFrame();
     });
     this.clearCanvas();
-    this.tileRenderer.render({ x: 0, y: 0 }, [
+    if (this.keyHandler.heldDownKeys.includes("w")) this.pos.y -= 0.1;
+    if (this.keyHandler.heldDownKeys.includes("s")) this.pos.y += 0.1;
+    if (this.keyHandler.heldDownKeys.includes("a")) this.pos.x -= 0.1;
+    if (this.keyHandler.heldDownKeys.includes("d")) this.pos.x += 0.1;
+    this.tileRenderer.render(this.pos, [
       [0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
       [0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
