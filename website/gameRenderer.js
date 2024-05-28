@@ -24,10 +24,8 @@ class GameRenderer {
   ];
 
   render() {
-    if (this.keyHandler.heldDownKeys.includes("w")) this.pos.y -= 0.1;
-    if (this.keyHandler.heldDownKeys.includes("s")) this.pos.y += 0.1;
-    if (this.keyHandler.heldDownKeys.includes("a")) this.pos.x -= 0.1;
-    if (this.keyHandler.heldDownKeys.includes("d")) this.pos.x += 0.1;
+    this.updatePos();
+
     const centerPos = {
       x: this.renderer.canvas.width * 0.5,
       y: this.renderer.canvas.height * 0.5,
@@ -57,6 +55,38 @@ class GameRenderer {
     );
   }
 
+  updatePos() {
+    const heldDownKeys = this.keyHandler.heldDownKeys;
+    const xMov =
+      heldDownKeys.includes("d") * 1 - heldDownKeys.includes("a") * 1;
+    const yMov =
+      heldDownKeys.includes("s") * 1 - heldDownKeys.includes("w") * 1;
+
+    if (xMov === 0 || yMov === 0) {
+      this.pos.x += xMov * this.baseSpeed;
+      this.pos.y += yMov * this.baseSpeed;
+    } else {
+      let angle;
+      if (xMov === 1) {
+        if (yMov === 1) {
+          angle = 135;
+        } else {
+          angle = 45;
+        }
+      } else {
+        if (yMov === 1) {
+          angle = 225;
+        } else {
+          angle = 315;
+        }
+      }
+
+      const movPos = this.utils.angleToCoords(angle, this.baseSpeed);
+      this.pos.x += movPos.x;
+      this.pos.y += movPos.y;
+    }
+  }
+
   #updateTileData(screenWidth, screenHeight) {
     this.tileSize = Math.ceil(screenWidth / this.tilesWidth);
     this.halftileSize = this.tileSize / 2;
@@ -72,10 +102,24 @@ class GameRenderer {
   halfShownTilesHeight;
   tilesHeight;
   halfTilesHeight;
-  tilesWidth = 100;
+  tilesWidth = 20;
   halfTilesWidth = this.tilesWidth / 2;
+  utils = new Utils();
+  baseSpeed = 0.1;
 }
 
-function getFractionFromWhole(num) {
-  return num - Math.round(num);
+class Utils {
+  getFractionFromWhole(num) {
+    return num - Math.round(num);
+  }
+  angleToCoords(angle, speed) {
+    angle = this.toRadians(angle);
+    return {
+      x: speed * Math.sin(angle),
+      y: speed * -Math.cos(angle),
+    };
+  }
+  toRadians(angle) {
+    return angle * (Math.PI / 180);
+  }
 }
