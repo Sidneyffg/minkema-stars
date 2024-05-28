@@ -35,8 +35,8 @@ class GameRenderer {
       heldDownKeys.includes("s") * 1 - heldDownKeys.includes("w") * 1;
 
     if (xMov === 0 || yMov === 0) {
-      this.pos.x += xMov * this.baseSpeed;
-      this.pos.y += yMov * this.baseSpeed;
+      this.pos.x += xMov * this.baseSpeed * Time.deltaTime;
+      this.pos.y += yMov * this.baseSpeed * Time.deltaTime;
     } else {
       let angle;
       if (xMov === 1) {
@@ -53,23 +53,20 @@ class GameRenderer {
         }
       }
 
-      const movPos = Utils.angleToCoords(angle, this.baseSpeed);
+      const movPos = Utils.angleToCoords(
+        angle,
+        this.baseSpeed * Time.deltaTime
+      );
       this.pos.x += movPos.x;
       this.pos.y += movPos.y;
     }
   }
 
-  baseSpeed = 0.1;
+  baseSpeed = 0.01;
   tileRenderer = new TileRenderer();
 }
 
 class TileRenderer {
-  /**
-   * @param {GameRenderer} gameRenderer
-   */
-  constructor(gameRenderer) {
-    this.gameRenderer = gameRenderer;
-  }
   render(ctx, tiles, pos) {
     const centerPos = {
       x: this.screenWidth * 0.5,
