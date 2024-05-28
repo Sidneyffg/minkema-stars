@@ -1,28 +1,46 @@
-class TileRenderer {
+class GameRenderer {
   /**
    * @param {Renderer} renderer
    * @param {AssetsHandler} assetsHandler
    */
-  constructor(renderer, assetsHandler) {
+  constructor(renderer, assetsHandler, keyHandler) {
     this.renderer = renderer;
     this.assetsHandler = assetsHandler;
+    this.keyHandler = keyHandler;
     renderer.onResize((w, h) => this.#updateTileData(w, h));
   }
+  pos = { x: 0, y: 0 };
+  tiles = [
+    [1, 1, 1, 1, 0, 1, 0, 1, 0, 1],
+    [1, 1, 0, 1, 1, 1, 1, 1, 1, 1],
+    [0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  ];
 
-  render(pos, tiles) {
+  render() {
+    if (this.keyHandler.heldDownKeys.includes("w")) this.pos.y -= 0.1;
+    if (this.keyHandler.heldDownKeys.includes("s")) this.pos.y += 0.1;
+    if (this.keyHandler.heldDownKeys.includes("a")) this.pos.x -= 0.1;
+    if (this.keyHandler.heldDownKeys.includes("d")) this.pos.x += 0.1;
     const centerPos = {
       x: this.renderer.canvas.width * 0.5,
       y: this.renderer.canvas.height * 0.5,
     };
 
-    for (let i = 0; i < tiles.length; i++) {
-      for (let j = 0; j < tiles[0].length; j++) {
+    for (let i = 0; i < this.tiles.length; i++) {
+      for (let j = 0; j < this.tiles[0].length; j++) {
         this.drawTileCenter(
           {
-            x: centerPos.x + (j - pos.x) * this.tileSize,
-            y: centerPos.y + (i - pos.y) * this.tileSize,
+            x: centerPos.x + (j - this.pos.x) * this.tileSize,
+            y: centerPos.y + (i - this.pos.y) * this.tileSize,
           },
-          tiles[i][j]
+          this.tiles[i][j]
         );
       }
     }
