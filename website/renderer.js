@@ -1,6 +1,7 @@
 class Renderer {
   async init() {
-    const socket = io();
+    this.socket = io();
+    this.initConnection();
     KeyHandler.init();
     await Assets.init();
 
@@ -12,6 +13,22 @@ class Renderer {
     };
     this.pos = { x: 0, y: 0 };
     this.renderFrame();
+  }
+
+  getUid() {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].split("=");
+      if (cookie[0] == "uid") return cookie[1];
+    }
+  }
+
+  initConnection() {
+    this.uid = this.getUid();
+    if (!this.uid) window.location.href += "/login";
+    this.socket.emit("init", {
+      uid: this.uid,
+    });
   }
 
   renderFrame() {

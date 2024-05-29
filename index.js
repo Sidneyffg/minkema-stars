@@ -1,12 +1,16 @@
 import fs from "fs";
 import express from "express";
-const app = express();
 import { createServer } from "http";
-const server = createServer(app);
 import { Server } from "socket.io";
+import MapHandler from "./maps/mapHandler.js";
+import UserHandler from "./userHandler.js";
+
+const app = express();
+const server = createServer(app);
 const io = new Server(server);
 const websitePath = `${process.cwd()}/website`;
 const assetsPath = `${process.cwd()}/assets`;
+MapHandler.init();
 
 app.use("/", express.static(websitePath));
 app.use("/assets", express.static(assetsPath));
@@ -14,7 +18,7 @@ app.use("/assets", express.static(assetsPath));
 generateAssetData();
 
 io.on("connection", (socket) => {
-  console.log("new connection");
+  UserHandler.newConnection(socket);
 });
 
 function generateAssetData() {

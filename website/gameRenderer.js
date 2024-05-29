@@ -7,6 +7,13 @@ class GameRenderer {
     renderer.onResize((w, h) => {
       this.tileRenderer.updateTileData(w, h);
     });
+    renderer.socket.on("gameUpdate", (type, data) => {
+      if (type == "posUpdate") {
+        if (data.uid !== this.renderer.uid) return;
+        this.pos.x += data.newPos.x;
+        this.pos.y += data.newPos.y;
+      }
+    });
   }
   pos = { x: 0, y: 0 };
   tiles = [
@@ -35,8 +42,11 @@ class GameRenderer {
       heldDownKeys.includes("s") * 1 - heldDownKeys.includes("w") * 1;
 
     if (xMov === 0 || yMov === 0) {
-      this.pos.x += xMov * this.baseSpeed * Time.deltaTime;
-      this.pos.y += yMov * this.baseSpeed * Time.deltaTime;
+      if (xMov === 0 && yMov === 0) return;
+      this.updatePosToServer({
+        x: xMov * this.baseSpeed * Time.deltaTime,
+        y: yMov * this.baseSpeed * Time.deltaTime,
+      });
     } else {
       let angle;
       if (xMov === 1) {
@@ -57,9 +67,16 @@ class GameRenderer {
         angle,
         this.baseSpeed * Time.deltaTime
       );
-      this.pos.x += movPos.x;
-      this.pos.y += movPos.y;
+      this.updatePosToServer(movPos);
     }
+  }
+
+  updatePosToServer(newPos) {
+    this.emit("posUpdate", newPos);
+  }
+
+  emit(type, data) {
+    this.renderer.socket.emit("gameUpdate", type, data);
   }
 
   baseSpeed = 0.01;
