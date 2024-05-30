@@ -1,4 +1,4 @@
-class Assets {
+export default class Assets {
   static async init() {
     return new Promise(async (resolve, reject) => {
       const fileNames = await Assets.getAssetsData();

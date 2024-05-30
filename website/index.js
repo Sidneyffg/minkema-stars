@@ -1,3 +1,9 @@
+import GameRenderer from "./gameRenderer.js";
+import MenuRenderer from "./menuRenderer.js";
+import KeyHandler from "./keyHandler.js";
+import Assets from "./assets.js";
+import Time from "./time.js";
+
 class Renderer {
   async init() {
     this.socket = io();
@@ -6,13 +12,13 @@ class Renderer {
     await Assets.init();
 
     this.gameRenderer = new GameRenderer(this);
+    this.menuRenderer = new MenuRenderer(this);
+    this.menuRenderer.activate();
 
     this.windowResize();
     window.onresize = () => {
       this.windowResize();
     };
-    this.pos = { x: 0, y: 0 };
-    this.renderFrame();
   }
 
   getUid() {
@@ -21,6 +27,7 @@ class Renderer {
       const cookie = cookies[i].split("=");
       if (cookie[0] == "uid") return cookie[1];
     }
+    return Math.random().toString(36).slice(2, 10);
   }
 
   initConnection() {
@@ -33,7 +40,7 @@ class Renderer {
 
   renderFrame() {
     requestAnimationFrame(() => {
-      this.renderFrame();
+      if (this.inGame) this.renderFrame();
     });
     Time.nextFrame();
     this.clearCanvas();
@@ -64,6 +71,7 @@ class Renderer {
   resizeCallbacks = [];
 
   renderers;
+  inGame = false;
   canvas = document.querySelector("canvas");
   ctx = this.canvas.getContext("2d");
 }

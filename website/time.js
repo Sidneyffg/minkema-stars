@@ -1,4 +1,4 @@
-class Time {
+export default class Time {
   static nextFrame() {
     const time = Date.now();
     Time.deltaTime = time - Time.lastTime;

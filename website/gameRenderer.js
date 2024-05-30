@@ -1,4 +1,8 @@
-class GameRenderer {
+import KeyHandler from "./keyHandler.js";
+import Assets from "./assets.js";
+import Time from "./time.js";
+
+export default class GameRenderer {
   /**
    * @param {Renderer} renderer
    */
