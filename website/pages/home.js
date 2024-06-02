@@ -7,7 +7,7 @@ export default class HomePage {
     document.querySelector("main").innerHTML += this.html;
     this.page = gbId("page-home");
     this.gameidInp = gbId("page-home-gameid");
-    console.log(this.gameidInp);
+
     gbId("page-home-play").addEventListener("click", () => {
       const gameid = this.gameidInp.value;
       if (!gameid) return;

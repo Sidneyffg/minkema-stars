@@ -14,8 +14,7 @@ export default class GameRenderer {
     renderer.socket.on("gameUpdate", (type, data) => {
       if (type == "posUpdate") {
         if (data.uid !== this.renderer.uid) return;
-        this.gameData.pos.x += data.newPos.x;
-        this.gameData.pos.y += data.newPos.y;
+        this.gameData.pos = data.newPos;
       }
     });
   }

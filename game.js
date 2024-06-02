@@ -14,7 +14,7 @@ export default class Game {
     this.on("posUpdate", ({ user, data }) => {
       user.pos.x += data.x;
       user.pos.y += data.y;
-      this.emitToAllPlayers("posUpdate", { uid: user.uid, newPos: data });
+      this.emitToAllPlayers("posUpdate", { uid: user.uid, newPos: user.pos });
     });
   }
 
