@@ -14,28 +14,20 @@ export default class GameRenderer {
     renderer.socket.on("gameUpdate", (type, data) => {
       if (type == "posUpdate") {
         if (data.uid !== this.renderer.uid) return;
-        this.pos.x += data.newPos.x;
-        this.pos.y += data.newPos.y;
+        this.gameData.pos.x += data.newPos.x;
+        this.gameData.pos.y += data.newPos.y;
       }
     });
   }
-  pos = { x: 0, y: 0 };
-  tiles = [
-    [1, 1, 1, 1, 0, 1, 0, 1, 0, 1],
-    [1, 1, 0, 1, 1, 1, 1, 1, 1, 1],
-    [0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  ];
+
+  updateGameData(gameData) {
+    this.gameData = gameData;
+    console.log(gameData);
+  }
 
   render(ctx) {
     this.updatePos();
-    this.tileRenderer.render(ctx, this.tiles, this.pos);
+    this.tileRenderer.render(ctx, this.gameData.map.tiles, this.gameData.pos);
   }
 
   updatePos() {
@@ -85,6 +77,7 @@ export default class GameRenderer {
 
   baseSpeed = 0.01;
   tileRenderer = new TileRenderer();
+  gameData;
 }
 
 class TileRenderer {

@@ -4,7 +4,7 @@ import KeyHandler from "./keyHandler.js";
 import Assets from "./assets.js";
 import Time from "./time.js";
 
-class Renderer {
+export class Renderer {
   async init() {
     this.socket = io();
     this.initConnection();
@@ -19,6 +19,13 @@ class Renderer {
     window.onresize = () => {
       this.windowResize();
     };
+
+    this.socket.on("joinGame", (gameData) => {
+      this.inGame = true;
+      this.menuRenderer.deactivate();
+      this.gameRenderer.updateGameData(gameData);
+      this.renderFrame();
+    });
   }
 
   getUid() {
@@ -36,6 +43,10 @@ class Renderer {
     this.socket.emit("init", {
       uid: this.uid,
     });
+  }
+
+  joinGame(id) {
+    this.socket.emit("joinGame", id);
   }
 
   renderFrame() {

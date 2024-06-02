@@ -3,14 +3,12 @@ export default class Game {
    * @param {import("socket.io").Socket[]} users
    * @param {*} mapData
    */
-  constructor(users, mapData) {
+  constructor(users, mapData, id) {
     this.users = users;
     this.mapData = mapData;
+    this.id = id;
     users.forEach((user) => {
-      user.pos = { x: 0, y: 0 };
-      user.socket.on("gameUpdate", (type, data) => {
-        this.listeners[type].forEach((e) => e({ user, data }));
-      });
+      this.initUser(user);
     });
 
     this.on("posUpdate", ({ user, data }) => {
@@ -18,6 +16,23 @@ export default class Game {
       user.pos.y += data.y;
       this.emitToAllPlayers("posUpdate", { uid: user.uid, newPos: data });
     });
+  }
+
+  initUser(user) {
+    user.pos = { x: 3, y: 0 };
+    user.socket.on("gameUpdate", (type, data) => {
+      this.listeners[type].forEach((e) => e({ user, data }));
+    });
+    const gameData = {
+      map: this.mapData,
+      pos: user.pos,
+    };
+    user.socket.emit("joinGame", gameData);
+  }
+
+  addUser(user) {
+    this.users.push(user);
+    this.initUser(user);
   }
 
   emitToAllPlayers(type, data) {
