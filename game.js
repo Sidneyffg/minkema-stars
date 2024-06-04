@@ -7,6 +7,8 @@ export default class Game {
     this.users = users;
     this.mapData = mapData;
     this.id = id;
+
+    // doesnt work with multiple people joining at the same time
     users.forEach((user) => {
       this.initUser(user);
     });
@@ -23,9 +25,16 @@ export default class Game {
     user.socket.on("gameUpdate", (type, data) => {
       this.listeners[type].forEach((e) => e({ user, data }));
     });
+    const users = [];
+    this.users.forEach((e) => {
+      users.push({
+        pos: e.pos,
+        uid: e.uid,
+      });
+    });
     const gameData = {
       map: this.mapData,
-      pos: user.pos,
+      users,
     };
     user.socket.emit("joinGame", gameData);
   }

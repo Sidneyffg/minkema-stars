@@ -11,20 +11,13 @@ export class Renderer {
     KeyHandler.init();
     await Assets.init();
 
-    this.gameRenderer = new GameRenderer(this);
     this.menuRenderer = new MenuRenderer(this);
     this.menuRenderer.activate();
-
-    this.windowResize();
-    window.onresize = () => {
-      this.windowResize();
-    };
 
     this.socket.on("joinGame", (gameData) => {
       this.inGame = true;
       this.menuRenderer.deactivate();
-      this.gameRenderer.updateGameData(gameData);
-      this.renderFrame();
+      this.startGame(gameData);
     });
   }
 
@@ -45,6 +38,10 @@ export class Renderer {
     });
   }
 
+  startGame(gameData) {
+    this.gameRenderer = new GameRenderer(this.uid, this.socket, gameData);
+  }
+
   joinGame(id) {
     this.socket.emit("joinGame", id);
   }
@@ -56,35 +53,10 @@ export class Renderer {
     Time.nextFrame();
     this.clearCanvas();
     this.gameRenderer.render(this.ctx);
-    this.ctx.fillRect(
-      this.canvas.width / 2 - 5,
-      this.canvas.height / 2 - 5,
-      10,
-      10
-    );
   }
-
-  clearCanvas() {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-  }
-
-  windowResize() {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    this.resizeCallbacks.forEach((e) => e(width, height));
-    this.canvas.width = width;
-    this.canvas.height = height;
-  }
-
-  onResize(callback) {
-    this.resizeCallbacks.push(callback);
-  }
-  resizeCallbacks = [];
 
   renderers;
   inGame = false;
-  canvas = document.querySelector("canvas");
-  ctx = this.canvas.getContext("2d");
 }
 
 const renderer = new Renderer();
