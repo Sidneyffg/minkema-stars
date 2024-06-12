@@ -1,6 +1,7 @@
 import PlayerHandler from "./playerHandler.js";
 import Assets from "./assets.js";
 import Time from "./time.js";
+import Utils from "./utils.js";
 
 export default class GameRenderer {
   /**
@@ -16,13 +17,9 @@ export default class GameRenderer {
     this.playerHandler = new PlayerHandler(this, data.users, this.uid);
     console.log(this.playerHandler.pos);
 
-    this.tileRenderer.updateTileData(window.innerWidth, window.innerHeight);
-    this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight;
+    this.screenResize();
     window.onresize = () => {
-      this.canvas.width = window.innerWidth;
-      this.canvas.height = window.innerHeight;
-      this.tileRenderer.updateTileData(window.innerWidth, window.innerHeight);
+      this.screenResize();
     };
     this.socket.on("gameUpdate", (type, data) => {
       const cb = this.listeners[type];
@@ -39,11 +36,9 @@ export default class GameRenderer {
 
     this.clearCanvas();
     this.playerHandler.updatePos();
-    this.tileRenderer.render(
-      this.ctx,
-      this.data.map.tiles,
-      this.playerHandler.pos
-    );
+
+    this.tileRenderer.render(this.data.map.tiles, this.playerHandler.pos);
+    this.playerHandler.renderPlayers();
   }
 
   clearCanvas() {
@@ -54,42 +49,64 @@ export default class GameRenderer {
     this.socket.emit("gameUpdate", type, data);
   }
 
+  screenResize() {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    this.canvas.width = width;
+    this.canvas.height = height;
+    this.screenCenterPos = {
+      x: width * 0.5,
+      y: height * 0.5,
+    };
+    this.screenResizeListeners.forEach((cb) => {
+      cb(width, height);
+    });
+  }
+
+  onScreenResize(cb) {
+    this.screenResizeListeners.push(cb);
+  }
+  screenResizeListeners = [];
+
   on(type, cb) {
     this.listeners[type] = cb;
   }
   listeners = {};
 
-  tileRenderer = new TileRenderer();
+  tileRenderer = new TileRenderer(this);
   data;
 }
 
 class TileRenderer {
-  render(ctx, tiles, pos) {
-    const centerPos = {
-      x: this.screenWidth * 0.5,
-      y: this.screenHeight * 0.5,
-    };
-
+  constructor(gameRenderer) {
+    this.gameRenderer = gameRenderer;
+    this.gameRenderer.onScreenResize((w, h) => {
+      this.updateTileData(w, h);
+    });
+  }
+  render(tiles, pos) {
     for (let i = 0; i < tiles.length; i++) {
       for (let j = 0; j < tiles[0].length; j++) {
         this.drawTileCenter(
-          ctx,
-          {
-            x: centerPos.x + (j - pos.x) * this.tileSize,
-            y: centerPos.y + (i - pos.y) * this.tileSize,
-          },
+          Utils.posToScreenCoords(
+            pos,
+            { x: i, y: j },
+            this.gameRenderer.screenCenterPos,
+            this.tileSize,
+            this.tileSize
+          ),
           tiles[i][j]
         );
       }
     }
   }
 
-  drawTileCenter(ctx, pos, tileId) {
+  drawTileCenter(pos, tileId) {
     const img = Assets.assets[["tile_orange", "tile_red"][tileId]];
-    ctx.drawImage(
+    this.gameRenderer.ctx.drawImage(
       img,
-      pos.x - this.halfTileSize,
-      pos.y - this.halfTileSize,
+      pos.x,
+      pos.y,
       this.tileSize,
       this.tileSize
     );
@@ -106,4 +123,8 @@ class TileRenderer {
   screenWidth;
   screenHeight;
   tilesWidth = 20;
+  /**
+   * @type {GameRenderer}
+   */
+  gameRenderer;
 }

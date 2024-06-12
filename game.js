@@ -4,7 +4,6 @@ export default class Game {
    * @param {*} mapData
    */
   constructor(users, mapData, id) {
-    this.users = users;
     this.mapData = mapData;
     this.id = id;
 
@@ -25,22 +24,34 @@ export default class Game {
     user.socket.on("gameUpdate", (type, data) => {
       this.listeners[type].forEach((e) => e({ user, data }));
     });
-    const users = [];
+
     this.users.forEach((e) => {
-      users.push({
-        pos: e.pos,
-        uid: e.uid,
+      e.socket.emit("gameUpdate", "newPlayer", {
+        pos: user.pos,
+        uid: user.uid,
       });
     });
+    this.users.push(user);
+
     const gameData = {
       map: this.mapData,
-      users,
+      users: this.genUserData(),
     };
     user.socket.emit("joinGame", gameData);
   }
 
+  genUserData() {
+    const usersData = [];
+    this.users.forEach((e) => {
+      usersData.push({
+        pos: e.pos,
+        uid: e.uid,
+      });
+    });
+    return usersData;
+  }
+
   addUser(user) {
-    this.users.push(user);
     this.initUser(user);
   }
 
@@ -58,4 +69,5 @@ export default class Game {
   }
   listeners = {};
   mapData;
+  users = [];
 }

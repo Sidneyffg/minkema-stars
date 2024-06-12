@@ -1,10 +1,12 @@
 import KeyHandler from "./keyHandler.js";
 import Time from "./time.js";
+import Utils from "./utils.js";
 
 export default class PlayerHandler {
   constructor(gameRenderer, users, uid) {
     this.gameRenderer = gameRenderer;
     this.users = users;
+    console.log(users);
     this.uid = uid;
     this.pos = this.users.find((e) => e.uid == uid).pos;
 
@@ -12,6 +14,10 @@ export default class PlayerHandler {
       const user = this.getUser(data.uid);
       user.pos.x = data.newPos.x;
       user.pos.y = data.newPos.y;
+    });
+    this.gameRenderer.on("newPlayer", (user) => {
+      console.log("newPlayer");
+      this.users.push(user);
     });
   }
 
@@ -60,11 +66,34 @@ export default class PlayerHandler {
     this.gameRenderer.emit("posUpdate", newPos);
   }
 
+  renderPlayers() {
+    this.users.forEach((user) => {
+      const pos = Utils.posToScreenCoords(
+        this.pos,
+        user.pos,
+        this.gameRenderer.screenCenterPos,
+        this.gameRenderer.tileRenderer.tileSize,
+        this.playerWidth
+      );
+      this.#renderPlayer(pos);
+    });
+  }
+
+  #renderPlayer(pos) {
+    this.gameRenderer.ctx.fillRect(
+      pos.x,
+      pos.y,
+      this.playerWidth,
+      this.playerWidth
+    );
+  }
+
   /**
    * @type {import("./gameRenderer.js").default}
    */
   gameRenderer;
   baseSpeed = 0.01;
+  playerWidth = 10;
 }
 /*
 this.ctx.fillRect(
@@ -74,19 +103,3 @@ this.ctx.fillRect(
       10
     );
 */
-
-class Utils {
-  static getFractionFromWhole(num) {
-    return num - Math.round(num);
-  }
-  static angleToCoords(angle, speed) {
-    angle = Utils.toRadians(angle);
-    return {
-      x: speed * Math.sin(angle),
-      y: speed * -Math.cos(angle),
-    };
-  }
-  static toRadians(angle) {
-    return angle * (Math.PI / 180);
-  }
-}
