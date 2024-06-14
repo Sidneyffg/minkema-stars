@@ -7,7 +7,8 @@ import Time from "./time.js";
 export class Renderer {
   async init() {
     this.socket = io();
-    this.initConnection();
+    this.loggedIn = await this.login();
+
     KeyHandler.init();
     await Assets.init();
 
@@ -21,20 +22,30 @@ export class Renderer {
     });
   }
 
-  getUid() {
-    const cookies = document.cookie.split(";");
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].split("=");
-      if (cookie[0] == "uid") return cookie[1];
-    }
-    return Math.random().toString(36).slice(2, 10);
+  getToken() {
+    return window.localStorage.getItem("token");
   }
 
-  initConnection() {
-    this.uid = this.getUid();
-    if (!this.uid) window.location.href += "/login";
-    this.socket.emit("init", {
-      uid: this.uid,
+  setToken(token) {
+    window.localStorage.setItem("token", token);
+  }
+
+  deleteToken() {
+    window.localStorage.removeItem("token");
+  }
+
+  login() {
+    return new Promise((resolve) => {
+      const token = this.getToken();
+      if (!token) return resolve(false);
+      this.socket.emit("init", token, (data) => {
+        if (!data) {
+          this.deleteToken();
+          return resolve(false);
+        }
+        this.data = data;
+        return resolve(true);
+      });
     });
   }
 

@@ -18,8 +18,15 @@
     <main></main>
   </body>
   <style>
+    :root {
+      --primary: rgb(14, 76, 192);
+      --dark: rgb(11, 53, 131);
+      --darker: rgb(7, 33, 80);
+      --light: rgb(17, 93, 235);
+    }
     * {
       box-sizing: border-box;
+      font-family: "Roboto";
     }
     html,
     body {
@@ -28,6 +35,15 @@
       width: 100vw;
       height: 100vh;
       overflow: hidden;
+    }
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p {
+      margin: 0;
     }
     canvas {
       width: 100%;
@@ -47,6 +63,49 @@
       }
       & > div#page-home {
         background-color: cyan;
+      }
+      & > div#page-login {
+        padding: 20px;
+        background-color: var(--primary);
+        & > div:not(.active) {
+          display: none;
+        }
+        & > div {
+          background-color: rgba(0, 0, 0, 0.3);
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          translate: -50% -50%;
+          width: 500px;
+          padding: 40px;
+          border-radius: 5px;
+          & > * {
+            display: block;
+          }
+          & > label {
+            margin-top: 10px;
+          }
+          & > input,
+          & > button {
+            outline: none;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0);
+            border: 0.5px rgb(0, 0, 0) solid;
+            padding: 5px 10px;
+          }
+          & > button {
+            margin: 20px 0 10px 0;
+            cursor: pointer;
+            background-color: var(--darker);
+          }
+          & > div {
+            display: flex;
+            gap: 10px;
+            & > :nth-child(2) {
+              cursor: pointer;
+            }
+          }
+        }
       }
     }
   </style>

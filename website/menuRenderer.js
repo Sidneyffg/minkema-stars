@@ -1,4 +1,5 @@
 import HomePage from "./pages/home.js";
+import LoginPage from "./pages/login.js";
 
 export default class MenuRenderer {
   constructor(renderer) {
@@ -7,15 +8,21 @@ export default class MenuRenderer {
   }
 
   loadPages() {
-    const main = document.querySelector("main");
     this.homePage = new HomePage(this.renderer);
+    this.loginPage = new LoginPage(this.renderer);
   }
 
   activate() {
     if (this.active) return;
     this.active = true;
-    this.homePage.load();
-    this.loadedPage = this.homePage;
+    if (this.renderer.loggedIn) {
+      this.homePage.load();
+      this.loadedPage = this.homePage
+    } else {
+      this.loginPage.load();
+      this.loadedPage = this.loginPage
+    }
+
   }
 
   deactivate() {
