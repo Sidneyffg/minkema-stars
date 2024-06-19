@@ -16,6 +16,58 @@
   <body>
     <canvas></canvas>
     <main></main>
+    <div id="message" class="alert success" style="display: none">
+      <span class="closebtn" onclick="this.parentElement.style.display='none';"
+        >&times;</span
+      >
+      <strong></strong>
+    </div>
+    <style>
+      /* Popups */
+      #message {
+        &.alert {
+          cursor: pointer;
+
+          padding: 20px;
+          background-color: #f44336;
+          color: white;
+          opacity: 1;
+          transition: opacity 0.6s;
+          position: absolute;
+          bottom: 25px;
+          right: 25px;
+          user-select: all;
+        }
+
+        &.alert.success {
+          background-color: #04aa6d;
+        }
+        &.alert.info {
+          background-color: #2196f3;
+        }
+        &.alert.warning {
+          background-color: #ff9800;
+        }
+        &.alert.error {
+          background-color: #f44336;
+        }
+
+        .closebtn {
+          color: white;
+          font-weight: bold;
+          float: right;
+          font-size: 22px;
+          line-height: 20px;
+          cursor: pointer;
+          transition: 0.3s;
+          padding: 0 0.8rem;
+        }
+
+        .closebtn:hover {
+          color: black;
+        }
+      }
+    </style>
   </body>
   <style>
     :root {

@@ -14,7 +14,8 @@ export default class GameRenderer {
     this.canvas = document.querySelector("canvas");
     this.ctx = this.canvas.getContext("2d");
 
-    this.playerHandler = new PlayerHandler(this, data.users, this.uid);
+    console.log(data,uid)
+    this.playerHandler = new PlayerHandler(this, data.players, this.uid);
     console.log(this.playerHandler.pos);
 
     this.screenResize();

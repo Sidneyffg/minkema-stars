@@ -1,63 +1,62 @@
 export default class Game {
   /**
-   * @param {import("socket.io").Socket[]} users
+   * @param {import("socket.io").Socket[]} players
    * @param {*} mapData
    */
-  constructor(users, mapData, id) {
+  constructor(players, mapData, id) {
     this.mapData = mapData;
     this.id = id;
 
-    // doesnt work with multiple people joining at the same time
-    users.forEach((user) => {
-      this.initUser(user);
+    players.forEach((player) => {
+      this.initPlayer(player);
     });
 
-    this.on("posUpdate", ({ user, data }) => {
-      user.pos.x += data.x;
-      user.pos.y += data.y;
-      this.emitToAllPlayers("posUpdate", { uid: user.uid, newPos: user.pos });
+    this.on("posUpdate", ({ player, data }) => {
+      player.pos.x += data.x;
+      player.pos.y += data.y;
+      this.emitToAllPlayers("posUpdate", { uid: player.uid, newPos: player.pos });
     });
   }
 
-  initUser(user) {
-    user.pos = { x: 3, y: 0 };
-    user.socket.on("gameUpdate", (type, data) => {
-      this.listeners[type].forEach((e) => e({ user, data }));
+  initPlayer(player) {
+    player.pos = { x: 3, y: 0 };
+    player.socket.on("gameUpdate", (type, data) => {
+      this.listeners[type].forEach((e) => e({ player, data }));
     });
 
-    this.users.forEach((e) => {
+    this.players.forEach((e) => {
       e.socket.emit("gameUpdate", "newPlayer", {
-        pos: user.pos,
-        uid: user.uid,
+        pos: player.pos,
+        uid: player.uid,
       });
     });
-    this.users.push(user);
+    this.players.push(player);
 
     const gameData = {
       map: this.mapData,
-      users: this.genUserData(),
+      players: this.genplayerData(),
     };
-    user.socket.emit("joinGame", gameData);
+    player.socket.emit("joinGame", gameData);
   }
 
-  genUserData() {
-    const usersData = [];
-    this.users.forEach((e) => {
-      usersData.push({
+  genplayerData() {
+    const playersData = [];
+    this.players.forEach((e) => {
+      playersData.push({
         pos: e.pos,
         uid: e.uid,
       });
     });
-    return usersData;
+    return playersData;
   }
 
-  addUser(user) {
-    this.initUser(user);
+  addPlayer(player) {
+    this.initPlayer(player);
   }
 
   emitToAllPlayers(type, data) {
-    this.users.forEach((user) => {
-      user.socket.emit("gameUpdate", type, data);
+    this.players.forEach((player) => {
+      player.socket.emit("gameUpdate", type, data);
     });
   }
 
@@ -69,5 +68,5 @@ export default class Game {
   }
   listeners = {};
   mapData;
-  users = [];
+  players = [];
 }

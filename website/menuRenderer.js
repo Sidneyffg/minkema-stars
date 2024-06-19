@@ -9,7 +9,13 @@ export default class MenuRenderer {
 
   loadPages() {
     this.homePage = new HomePage(this.renderer);
-    this.loginPage = new LoginPage(this.renderer);
+    this.loginPage = new LoginPage(this.renderer, this);
+  }
+
+  loadPage(page) {
+    if (this.loadedPage) this.loadedPage.unload();
+    page.load();
+    this.loadedPage = page;
   }
 
   activate() {
@@ -17,12 +23,11 @@ export default class MenuRenderer {
     this.active = true;
     if (this.renderer.loggedIn) {
       this.homePage.load();
-      this.loadedPage = this.homePage
+      this.loadedPage = this.homePage;
     } else {
       this.loginPage.load();
-      this.loadedPage = this.loginPage
+      this.loadedPage = this.loginPage;
     }
-
   }
 
   deactivate() {
@@ -31,10 +36,16 @@ export default class MenuRenderer {
     this.loadedPage.unload();
   }
 
+  message(type, msg) {
+    const btn_callBack = document.getElementById("message");
+    btn_callBack.innerHTML = `<span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>${msg}`;
+    btn_callBack.style.display = `block`;
+    btn_callBack.classList.add(`${type}`);
+  }
+
   /**
    * @type {{[x:string]:Element}}
    */
-  pages = {};
   loadedPage = null;
   active = false;
   /**

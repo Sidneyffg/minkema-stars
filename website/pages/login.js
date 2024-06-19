@@ -1,6 +1,7 @@
 export default class LoginPage {
-  constructor(renderer) {
+  constructor(renderer, menuRenderer) {
     this.renderer = renderer;
+    this.menuRenderer = menuRenderer;
 
     this.appendHtml();
     this.loadElements();
@@ -12,7 +13,75 @@ export default class LoginPage {
       this.switchPage();
     });
 
-    this.elems["login-btn"].addEventListener("click", () => []);
+    this.elems["login-btn"].addEventListener("click", () => {
+      const username = this.elems["login-username"].value;
+      if (!this.#isValidUsername(username, { hasUid: true }))
+        return this.menuRenderer.message("error", "Invalid username");
+      const password = this.elems["login-password"].value;
+      if (!this.#isValidPassword(password))
+        return this.menuRenderer.message("error", "Invalid password");
+      this.renderer.socket.emit(
+        "init",
+        { type: "usernameLogin", username, password },
+        ({ err, uid, token }) => {
+          if (err)
+            return this.menuRenderer.message("error", "Failed to log in");
+
+          this.renderer.setToken(token);
+          this.renderer.setUid(uid);
+          this.menuRenderer.loadPage(this.menuRenderer.homePage);
+        }
+      );
+    });
+
+    this.elems["signup-btn"].addEventListener("click", () => {
+      const username = this.elems["signup-username"].value;
+      if (!this.#isValidUsername(username))
+        return this.menuRenderer.message("error", "Invalid username");
+      const password = this.elems["signup-password"].value;
+      if (!this.#isValidPassword(password))
+        return this.menuRenderer.message("error", "Invalid password");
+      const passwordRepeat = this.elems["signup-password-repeat"].value;
+      if (password !== passwordRepeat)
+        return this.menuRenderer.message("error", "Passwords do not match");
+
+      this.renderer.socket.emit(
+        "init",
+        { type: "signup", username, password },
+        ({ err, uid, token }) => {
+          if (err)
+            return this.menuRenderer.message("error", "Failed to log in");
+
+          this.renderer.setToken(token);
+          this.renderer.setUid(uid);
+          this.menuRenderer.loadPage(this.menuRenderer.homePage);
+        }
+      );
+    });
+  }
+
+  /**
+   * @param {string} username
+   * @param {object} [options]
+   * @param {boolean} [options.hasUid]
+   * @returns {boolean}
+   */
+  #isValidUsername(username, options = {}) {
+    if (options.hasUid) {
+      const matches = username.match(/[a-zA-Z0-9]{3,15}#[a-zA-NP-Z1-9]{6}/);
+      if (!matches || matches.length != 1 || matches[0] != username)
+        return false;
+      return true;
+    }
+    const matches = username.match(/[a-zA-Z0-9]{3,15}/);
+    if (!matches || matches.length != 1 || matches[0] != username) return false;
+    return true;
+  }
+
+  #isValidPassword(password) {
+    const matches = password.match(/[a-zA-Z0-9.,]{8,30}/);
+    if (!matches || matches.length != 1 || matches[0] != password) return false;
+    return true;
   }
 
   loadElements() {
@@ -56,12 +125,14 @@ export default class LoginPage {
   }
 
   appendHtml() {
-    document.querySelector("main").innerHTML += this.html;
+    const div = document.createElement("DIV");
+    div.innerHTML = this.html;
+    div.id = this.pageId;
+    document.querySelector("main").appendChild(div);
     this.page = document.getElementById(this.pageId);
   }
 
   html = /* html */ `
-  <div id="page-login">
     <div class="login active" id="page-login-login-page">
       <h2>Login</h2>
       <label for="page-login-login-username">Username</label>
@@ -88,7 +159,7 @@ export default class LoginPage {
         <p id="page-login-open-login"><b>Log in</b></p>
       </div>
     </div>
-  </div>`;
+  `;
 
   /**
    * @type {import("../index.js").Renderer}

@@ -3,26 +3,26 @@ import Time from "./time.js";
 import Utils from "./utils.js";
 
 export default class PlayerHandler {
-  constructor(gameRenderer, users, uid) {
+  constructor(gameRenderer, players, uid) {
     this.gameRenderer = gameRenderer;
-    this.users = users;
-    console.log(users);
+    this.players = players;
+    console.log(players);
     this.uid = uid;
-    this.pos = this.users.find((e) => e.uid == uid).pos;
+    this.pos = this.players.find((e) => e.uid == uid).pos;
 
     this.gameRenderer.on("posUpdate", (data) => {
-      const user = this.getUser(data.uid);
-      user.pos.x = data.newPos.x;
-      user.pos.y = data.newPos.y;
+      const player = this.getPlayer(data.uid);
+      player.pos.x = data.newPos.x;
+      player.pos.y = data.newPos.y;
     });
-    this.gameRenderer.on("newPlayer", (user) => {
+    this.gameRenderer.on("newPlayer", (player) => {
       console.log("newPlayer");
-      this.users.push(user);
+      this.players.push(player);
     });
   }
 
-  getUser(uid) {
-    return this.users.find((e) => e.uid == uid);
+  getPlayer(uid) {
+    return this.players.find((e) => e.uid == uid);
   }
 
   updatePos() {
@@ -67,10 +67,10 @@ export default class PlayerHandler {
   }
 
   renderPlayers() {
-    this.users.forEach((user) => {
+    this.players.forEach((player) => {
       const pos = Utils.posToScreenCoords(
         this.pos,
-        user.pos,
+        player.pos,
         this.gameRenderer.screenCenterPos,
         this.gameRenderer.tileRenderer.tileSize,
         this.playerWidth

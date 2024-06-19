@@ -5,6 +5,7 @@ export default class KeyHandler {
   }
   static listenKeyDown() {
     window.addEventListener("keydown", (e) => {
+      if (!e.key) return;
       if (e.key == "Backspace")
         KeyHandler.callbacks.forEach(({ cb }) => cb(e.key));
       if (KeyHandler.heldDownKeys.includes(e.key)) return;

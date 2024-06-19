@@ -3,7 +3,7 @@ import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import MapHandler from "./maps/mapHandler.js";
-import UserHandler from "./userHandler.js";
+import PlayerHandler from "./playerHandler/playerHandler.js";
 
 const app = express();
 const server = createServer(app);
@@ -11,6 +11,7 @@ const io = new Server(server);
 const websitePath = `${process.cwd()}/website`;
 const assetsPath = `${process.cwd()}/assets`;
 MapHandler.init();
+PlayerHandler.init();
 
 app.use("/", express.static(websitePath));
 app.use("/assets", express.static(assetsPath));
@@ -18,7 +19,7 @@ app.use("/assets", express.static(assetsPath));
 generateAssetData();
 
 io.on("connection", (socket) => {
-  UserHandler.newConnection(socket);
+  PlayerHandler.newConnection(socket);
 });
 
 function generateAssetData() {

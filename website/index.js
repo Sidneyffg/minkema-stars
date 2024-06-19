@@ -6,6 +6,7 @@ import Time from "./time.js";
 
 export class Renderer {
   async init() {
+    this.uid = this.#getUid();
     this.socket = io();
     this.loggedIn = await this.login();
 
@@ -34,18 +35,36 @@ export class Renderer {
     window.localStorage.removeItem("token");
   }
 
+  #getUid() {
+    return window.localStorage.getItem("uid");
+  }
+
+  setUid(uid) {
+    window.localStorage.setItem("uid", uid);
+    this.uid = uid;
+  }
+
+  deleteUid() {
+    window.localStorage.removeItem("uid");
+  }
+
   login() {
     return new Promise((resolve) => {
       const token = this.getToken();
-      if (!token) return resolve(false);
-      this.socket.emit("init", token, (data) => {
-        if (!data) {
-          this.deleteToken();
-          return resolve(false);
+      if (!token || !this.uid) return resolve(false);
+
+      this.socket.emit(
+        "init",
+        { type: "tokenLogin", token, uid: this.uid },
+        (data) => {
+          if (data.err) {
+            this.deleteToken();
+            this.deleteUid();
+            return resolve(false);
+          }
+          return resolve(true);
         }
-        this.data = data;
-        return resolve(true);
-      });
+      );
     });
   }
 
