@@ -14,7 +14,7 @@ export default class GameRenderer {
     this.canvas = document.querySelector("canvas");
     this.ctx = this.canvas.getContext("2d");
 
-    console.log(data,uid)
+    console.log(data, uid);
     this.playerHandler = new PlayerHandler(this, data.players, this.uid);
     console.log(this.playerHandler.pos);
 
@@ -89,7 +89,7 @@ class TileRenderer {
     for (let i = 0; i < tiles.length; i++) {
       for (let j = 0; j < tiles[0].length; j++) {
         this.drawTileCenter(
-          Utils.posToScreenCoords(
+          Utils.posToTLScreenCoords(
             pos,
             { x: i, y: j },
             this.gameRenderer.screenCenterPos,
@@ -104,13 +104,7 @@ class TileRenderer {
 
   drawTileCenter(pos, tileId) {
     const img = Assets.assets[["tile_orange", "tile_red"][tileId]];
-    this.gameRenderer.ctx.drawImage(
-      img,
-      pos.x,
-      pos.y,
-      this.tileSize,
-      this.tileSize
-    );
+    this.gameRenderer.ctx.drawImage(img, pos.x, pos.y, this.tileSize, this.tileSize);
   }
 
   updateTileData(screenWidth, screenHeight) {

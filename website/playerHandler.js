@@ -32,10 +32,8 @@ export default class PlayerHandler {
 
   updatePos() {
     const heldDownKeys = KeyHandler.heldDownKeys;
-    const xMov =
-      heldDownKeys.includes("d") * 1 - heldDownKeys.includes("a") * 1;
-    const yMov =
-      heldDownKeys.includes("s") * 1 - heldDownKeys.includes("w") * 1;
+    const xMov = heldDownKeys.includes("d") * 1 - heldDownKeys.includes("a") * 1;
+    const yMov = heldDownKeys.includes("s") * 1 - heldDownKeys.includes("w") * 1;
 
     if (xMov === 0 || yMov === 0) {
       if (xMov === 0 && yMov === 0) return;
@@ -59,10 +57,7 @@ export default class PlayerHandler {
         }
       }
 
-      const movPos = Utils.angleToCoords(
-        angle,
-        this.baseSpeed * Time.deltaTime
-      );
+      const movPos = Utils.angleToCoords(angle, this.baseSpeed * Time.deltaTime);
       this.updatePosToServer(movPos);
     }
   }
@@ -73,24 +68,34 @@ export default class PlayerHandler {
 
   render() {
     this.players.forEach((player) => {
-      const pos = Utils.posToScreenCoords(
+      const playerPos = Utils.posToTLScreenCoords(
         this.pos,
         player.pos,
         this.gameRenderer.screenCenterPos,
         this.gameRenderer.tileRenderer.tileSize,
         this.playerWidth
       );
-      this.#renderPlayer(pos);
+
+      const textPos = Utils.posToMiddleScreenCoords(
+        this.pos,
+        {
+          x: player.pos.x,
+          y: player.pos.y,
+        },
+        this.gameRenderer.screenCenterPos,
+        this.gameRenderer.tileRenderer.tileSize
+      );
+      textPos.y -= 20;
+      this.#renderPlayer(playerPos, textPos, player.username);
     });
   }
 
-  #renderPlayer(pos) {
-    this.gameRenderer.ctx.fillRect(
-      pos.x,
-      pos.y,
-      this.playerWidth,
-      this.playerWidth
-    );
+  #renderPlayer(playerPos, textPos, username) {
+    const ctx = this.gameRenderer.ctx;
+    ctx.fillRect(playerPos.x, playerPos.y, this.playerWidth, this.playerWidth);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "alphbetic";
+    ctx.fillText(username, textPos.x, textPos.y);
   }
 
   /**
