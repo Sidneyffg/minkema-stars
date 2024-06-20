@@ -7,7 +7,7 @@ export default class PlayerHandler {
   static init() {
     const data = fs.readFileSync("./playerHandler/players.json");
     JSON.parse(data).forEach((playerData) => {
-      PlayerHandler.players.push(new Player(playerData));
+      PlayerHandler.players.push(new Player(false, playerData));
     });
   }
 
@@ -59,7 +59,7 @@ export default class PlayerHandler {
         const player = PlayerHandler.getPlayer({ uid });
         if (
           !player ||
-          player.username !== name ||
+          player.publicData.username !== name ||
           !player.comparePassword(data.password)
         )
           return PlayerHandler.handleLoginCb(false, cb, successCb, socket);
@@ -85,7 +85,10 @@ export default class PlayerHandler {
   static handleLoginCb(successfull, socketCb, successCb, socket, player) {
     if (successfull) {
       player.turnOnline(socket);
-      socketCb({ uid: player.uid, token: player.token });
+      socketCb({
+        publicData: player.publicData,
+        privateData: player.privateData,
+      });
       successCb(player);
     } else {
       socketCb({ err: true });
@@ -111,14 +114,17 @@ export default class PlayerHandler {
    * @returns {Player | null}
    */
   static getPlayer(data) {
-    if (data.uid) return PlayerHandler.players.find((e) => e.uid == data.uid);
+    if (data.uid)
+      return PlayerHandler.players.find((e) => e.publicData.uid == data.uid);
     if (data.token)
-      return PlayerHandler.players.find((e) => e.token == data.token);
+      return PlayerHandler.players.find(
+        (e) => e.privateData.token == data.token
+      );
     return null;
   }
 
   static addPlayer(username, password) {
-    const player = new Player({ username, password });
+    const player = new Player(true, { username, password });
     PlayerHandler.players.push(player);
     PlayerHandler.savePlayers();
     return player;
@@ -147,12 +153,11 @@ export default class PlayerHandler {
       const matches = username.match(/[a-zA-Z0-9]{3,15}#[a-zA-NP-Z1-9]{6}/);
       if (!matches || matches.length != 1 || matches[0] != username)
         return false;
-
       if (options.playerExists) {
         const name = username.split("#")[0];
         const uid = username.split("#")[1];
         const player = PlayerHandler.getPlayer({ uid });
-        if (!player || player.username != name) return false;
+        if (!player || player.publicData.username != name) return false;
       }
       return true;
     }

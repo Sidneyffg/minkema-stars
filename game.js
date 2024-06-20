@@ -14,11 +14,11 @@ export default class Game {
     });
 
     this.on("posUpdate", ({ player, data }) => {
-      player.pos.x += data.x;
-      player.pos.y += data.y;
+      player.gameData.pos.x += data.x;
+      player.gameData.pos.y += data.y;
       this.emitToAllPlayers("posUpdate", {
-        uid: player.uid,
-        newPos: player.pos,
+        uid: player.gameData.uid,
+        newPos: player.gameData.pos,
       });
     });
   }
@@ -27,38 +27,31 @@ export default class Game {
    * @param {Player} player
    */
   initPlayer(player) {
-    player.pos = { x: 3, y: 0 };
+    player.gameData = {
+      pos: { x: 3, y: 3 },
+      username: player.publicData.username,
+      uid: player.publicData.uid,
+    };
     player.socket.on("gameUpdate", (type, data) => {
       this.listeners[type].forEach((e) => e({ player, data }));
     });
 
     this.players.forEach((e) => {
-      e.socket.emit("gameUpdate", "newPlayer", {
-        pos: player.pos,
-        uid: player.uid,
-      });
+      e.socket.emit("gameUpdate", "newPlayer", player.gameData);
     });
     this.players.push(player);
 
-    const gameData = {
-      map: this.mapData,
-      players: this.genPlayerData(),
-    };
-    player.socket.emit("joinGame", gameData);
+    player.socket.emit("joinGame", this.getGameData());
     player.addOfflineListener(() => {
       this.removePlayer(player);
     });
   }
 
-  genPlayerData() {
-    const playersData = [];
-    this.players.forEach((e) => {
-      playersData.push({
-        pos: e.pos,
-        uid: e.uid,
-      });
-    });
-    return playersData;
+  getGameData() {
+    return {
+      players: this.players.map((e) => e.gameData),
+      map: this.mapData,
+    };
   }
 
   addPlayer(player) {
@@ -71,12 +64,13 @@ export default class Game {
   removePlayer(player) {
     const idx = this.players.indexOf(player);
     this.players.splice(idx, 1);
-    this.emitToAllPlayers("playerLeft", { uid: player.uid });
+    this.emitToAllPlayers("playerLeft", { uid: player.gameData.uid });
+    player.gameData = null;
   }
 
   /**
-   * @param {string} type 
-   * @param {*} data 
+   * @param {string} type
+   * @param {*} data
    */
   emitToAllPlayers(type, data) {
     this.players.forEach((player) => {
@@ -84,6 +78,15 @@ export default class Game {
     });
   }
 
+  /**
+   * @callback gameUpdateCallback
+   * @param {{player:Player,data:any}}
+   */
+
+  /**
+   * @param {string} type
+   * @param {gameUpdateCallback} callback
+   */
   on(type, callback) {
     if (this.listeners[type] == undefined) {
       this.listeners[type] = [];
@@ -92,5 +95,9 @@ export default class Game {
   }
   listeners = {};
   mapData;
+
+  /**
+   * @type {Player[]}
+   */
   players = [];
 }

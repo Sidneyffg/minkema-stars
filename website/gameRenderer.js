@@ -39,7 +39,7 @@ export default class GameRenderer {
     this.playerHandler.updatePos();
 
     this.tileRenderer.render(this.data.map.tiles, this.playerHandler.pos);
-    this.playerHandler.renderPlayers();
+    this.playerHandler.render();
   }
 
   clearCanvas() {

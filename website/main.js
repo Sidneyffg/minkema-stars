@@ -56,12 +56,13 @@ export class Main {
       this.socket.emit(
         "init",
         { type: "tokenLogin", token, uid: this.uid },
-        (data) => {
-          if (data.err) {
+        ({ err, publicData, privateData }) => {
+          if (err) {
             this.deleteToken();
             this.deleteUid();
             return resolve(false);
           }
+          console.log(publicData, privateData);
           return resolve(true);
         }
       );
@@ -69,6 +70,7 @@ export class Main {
   }
 
   startGame(gameData) {
+    console.log(gameData);
     this.gameRenderer = new GameRenderer(this.uid, this.socket, gameData);
   }
 

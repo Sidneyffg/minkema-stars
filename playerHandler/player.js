@@ -1,38 +1,41 @@
 import { v4 as uuid } from "uuid";
-
 import bcrypt from "bcrypt";
 
 export default class Player {
-  constructor(data) {
+  constructor(newPlayer, data) {
     this.online = false;
     this.socket = null;
-    if (!data.uid) {
-      return this.#initPlayerData(data);
-    }
-    this.token = data.token;
-    this.uid = data.uid;
-    this.username = data.username;
-    this.password = data.password;
+
+    if (newPlayer) return this.#initPlayerData(data);
+    this.publicData = data.publicData;
+    this.privateData = data.privateData;
+    this.serverData = data.serverData;
   }
 
   #initPlayerData(data) {
-    this.username = data.username;
-    this.uid = genNewUid();
-    this.token = uuid();
-    this.password = bcrypt.hashSync(data.password, 10);
+    this.publicData = {
+      username: data.username,
+      uid: genNewUid(),
+    };
+    this.privateData = {
+      token: uuid(),
+    };
+    this.serverData = {
+      password: bcrypt.hashSync(data.password, 10),
+    };
   }
 
   comparePassword(password) {
     if (typeof password != "string") return false;
-    return !!bcrypt.compareSync(password, this.password);
+    return !!bcrypt.compareSync(password, this.serverData.password);
   }
 
   compareToken(token) {
-    if (token.length !== this.token.length) return false;
+    if (token.length !== this.privateData.token.length) return false;
 
     let isEqual = true;
     for (let i = 0; i < token.length; i++)
-      if (token.charAt(i) != this.token.charAt(i)) isEqual = false;
+      if (token.charAt(i) != this.privateData.token.charAt(i)) isEqual = false;
 
     return isEqual;
   }
@@ -40,7 +43,7 @@ export default class Player {
   turnOnline(socket) {
     this.online = true;
     this.socket = socket;
-    console.log(`Player ${this.uid} is now online`);
+    console.log(`Player ${this.publicData.uid} is now online`);
   }
 
   turnOffline() {
@@ -50,7 +53,7 @@ export default class Player {
       e();
     });
     this.#offlineListeners = [];
-    console.log(`Player ${this.uid} is now offline`);
+    console.log(`Player ${this.publicData.uid} is now offline`);
   }
 
   /**
@@ -69,19 +72,29 @@ export default class Player {
 
   getJSON() {
     return {
-      token: this.token,
-      uid: this.uid,
-      username: this.username,
-      password: this.password,
+      publicData: this.publicData,
+      privateData: this.privateData,
+      serverData: this.serverData,
     };
   }
 
-  token;
-  uid;
-  username;
-  password;
-  online;
-  socket;
+  /**
+   * @type {playerPublicData}
+   */
+  publicData;
+
+  /**
+   * @type {playerPrivateData}
+   */
+  privateData;
+
+  /**
+   * @type {playerServerData}
+   */
+  serverData;
+  gameData;
+  online = false;
+  socket = null;
 }
 
 function genNewUid() {
@@ -95,3 +108,22 @@ function genNewUid() {
 
   return uid;
 }
+
+/**
+ * @typedef playerPublicData
+ * @type {object}
+ * @property {string} username
+ * @property {string} uid
+ */
+
+/**
+ * @typedef playerPrivateData
+ * @type {object}
+ * @property {string} token
+ */
+
+/**
+ * @typedef playerServerData
+ * @type {object}
+ * @property {string} password
+ */

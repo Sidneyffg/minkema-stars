@@ -23,12 +23,12 @@ export default class LoginPage {
       this.main.socket.emit(
         "init",
         { type: "usernameLogin", username, password },
-        ({ err, uid, token }) => {
+        ({ err, publicData, privateData }) => {
           if (err)
             return this.menuRenderer.message("error", "Failed to log in");
 
-          this.main.setToken(token);
-          this.main.setUid(uid);
+          this.main.setToken(privateData.token);
+          this.main.setUid(publicData.uid);
           this.menuRenderer.loadPage(this.menuRenderer.homePage);
         }
       );
@@ -48,12 +48,12 @@ export default class LoginPage {
       this.main.socket.emit(
         "init",
         { type: "signup", username, password },
-        ({ err, uid, token }) => {
+        ({ err, publicData, privateData }) => {
           if (err)
             return this.menuRenderer.message("error", "Failed to log in");
 
-          this.main.setToken(token);
-          this.main.setUid(uid);
+          this.main.setToken(privateData.token);
+          this.main.setUid(publicData.uid);
           this.menuRenderer.loadPage(this.menuRenderer.homePage);
         }
       );

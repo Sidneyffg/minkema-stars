@@ -71,7 +71,7 @@ export default class PlayerHandler {
     this.gameRenderer.emit("posUpdate", newPos);
   }
 
-  renderPlayers() {
+  render() {
     this.players.forEach((player) => {
       const pos = Utils.posToScreenCoords(
         this.pos,
@@ -97,6 +97,7 @@ export default class PlayerHandler {
    * @type {import("./gameRenderer.js").default}
    */
   gameRenderer;
+  players;
   baseSpeed = 0.01;
   playerWidth = 10;
 }
