@@ -1,6 +1,6 @@
 export default class HomePage {
-  constructor(renderer) {
-    this.renderer = renderer;
+  constructor(main) {
+    this.main = main;
 
     this.appendHtml();
     this.loadElements();
@@ -8,18 +8,15 @@ export default class HomePage {
     this.elems["play"].addEventListener("click", () => {
       const gameid = this.elems["gameid"].value;
       if (!gameid) return;
-      this.renderer.joinGame(gameid);
+      this.main.joinGame(gameid);
     });
   }
 
-  loadElements(){
+  loadElements() {
     const gbId = (id) => {
       return document.getElementById(`${this.pageId}-${id}`);
     };
-    [
-      "gameid",
-      "play",
-    ].forEach((id) => {
+    ["gameid", "play"].forEach((id) => {
       this.elems[id] = gbId(id);
     });
   }
@@ -36,7 +33,7 @@ export default class HomePage {
     const div = document.createElement("DIV");
     div.innerHTML = this.html;
     div.id = this.pageId;
-    document.querySelector("main").appendChild(div)
+    document.querySelector("main").appendChild(div);
     this.page = document.getElementById(this.pageId);
   }
 
@@ -47,9 +44,9 @@ export default class HomePage {
   `;
 
   /**
-   * @type {import("../index.js").Renderer}
+   * @type {import("../main.js").Main}
    */
-  renderer;
+  main;
   elems = {};
   pageName = "home";
   pageId = `page-${this.pageName}`;

@@ -1,6 +1,6 @@
 export default class LoginPage {
-  constructor(renderer, menuRenderer) {
-    this.renderer = renderer;
+  constructor(main, menuRenderer) {
+    this.main = main;
     this.menuRenderer = menuRenderer;
 
     this.appendHtml();
@@ -20,15 +20,15 @@ export default class LoginPage {
       const password = this.elems["login-password"].value;
       if (!this.#isValidPassword(password))
         return this.menuRenderer.message("error", "Invalid password");
-      this.renderer.socket.emit(
+      this.main.socket.emit(
         "init",
         { type: "usernameLogin", username, password },
         ({ err, uid, token }) => {
           if (err)
             return this.menuRenderer.message("error", "Failed to log in");
 
-          this.renderer.setToken(token);
-          this.renderer.setUid(uid);
+          this.main.setToken(token);
+          this.main.setUid(uid);
           this.menuRenderer.loadPage(this.menuRenderer.homePage);
         }
       );
@@ -45,15 +45,15 @@ export default class LoginPage {
       if (password !== passwordRepeat)
         return this.menuRenderer.message("error", "Passwords do not match");
 
-      this.renderer.socket.emit(
+      this.main.socket.emit(
         "init",
         { type: "signup", username, password },
         ({ err, uid, token }) => {
           if (err)
             return this.menuRenderer.message("error", "Failed to log in");
 
-          this.renderer.setToken(token);
-          this.renderer.setUid(uid);
+          this.main.setToken(token);
+          this.main.setUid(uid);
           this.menuRenderer.loadPage(this.menuRenderer.homePage);
         }
       );
@@ -162,9 +162,9 @@ export default class LoginPage {
   `;
 
   /**
-   * @type {import("../index.js").Renderer}
+   * @type {import("../main.js").Main}
    */
-  renderer;
+  main;
   /**
    * @type {{[x:string]:Element}}
    */

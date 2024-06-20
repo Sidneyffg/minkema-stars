@@ -4,7 +4,7 @@ import KeyHandler from "./keyHandler.js";
 import Assets from "./assets.js";
 import Time from "./time.js";
 
-export class Renderer {
+export class Main {
   async init() {
     this.uid = this.#getUid();
     this.socket = io();
@@ -85,9 +85,7 @@ export class Renderer {
     this.gameRenderer.render(this.ctx);
   }
 
-  renderers;
   inGame = false;
 }
 
-const renderer = new Renderer();
-renderer.init();
+new Main().init();

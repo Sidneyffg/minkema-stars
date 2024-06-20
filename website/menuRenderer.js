@@ -2,14 +2,14 @@ import HomePage from "./pages/home.js";
 import LoginPage from "./pages/login.js";
 
 export default class MenuRenderer {
-  constructor(renderer) {
-    this.renderer = renderer;
+  constructor(main) {
+    this.main = main;
     this.loadPages();
   }
 
   loadPages() {
-    this.homePage = new HomePage(this.renderer);
-    this.loginPage = new LoginPage(this.renderer, this);
+    this.homePage = new HomePage(this.main);
+    this.loginPage = new LoginPage(this.main, this);
   }
 
   loadPage(page) {
@@ -21,7 +21,7 @@ export default class MenuRenderer {
   activate() {
     if (this.active) return;
     this.active = true;
-    if (this.renderer.loggedIn) {
+    if (this.main.loggedIn) {
       this.homePage.load();
       this.loadedPage = this.homePage;
     } else {
@@ -49,7 +49,7 @@ export default class MenuRenderer {
   loadedPage = null;
   active = false;
   /**
-   * @type {import("./index.js").Renderer}
+   * @type {import("./main.js").Main}
    */
-  renderer;
+  main;
 }
