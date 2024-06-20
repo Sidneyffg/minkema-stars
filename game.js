@@ -1,6 +1,8 @@
+import Player from "./playerHandler/player.js";
+
 export default class Game {
   /**
-   * @param {import("socket.io").Socket[]} players
+   * @param {Player[]} players
    * @param {*} mapData
    */
   constructor(players, mapData, id) {
@@ -14,10 +16,16 @@ export default class Game {
     this.on("posUpdate", ({ player, data }) => {
       player.pos.x += data.x;
       player.pos.y += data.y;
-      this.emitToAllPlayers("posUpdate", { uid: player.uid, newPos: player.pos });
+      this.emitToAllPlayers("posUpdate", {
+        uid: player.uid,
+        newPos: player.pos,
+      });
     });
   }
 
+  /**
+   * @param {Player} player
+   */
   initPlayer(player) {
     player.pos = { x: 3, y: 0 };
     player.socket.on("gameUpdate", (type, data) => {
@@ -34,12 +42,15 @@ export default class Game {
 
     const gameData = {
       map: this.mapData,
-      players: this.genplayerData(),
+      players: this.genPlayerData(),
     };
     player.socket.emit("joinGame", gameData);
+    player.addOfflineListener(() => {
+      this.removePlayer(player);
+    });
   }
 
-  genplayerData() {
+  genPlayerData() {
     const playersData = [];
     this.players.forEach((e) => {
       playersData.push({
@@ -54,6 +65,19 @@ export default class Game {
     this.initPlayer(player);
   }
 
+  /**
+   * @param {Player} player
+   */
+  removePlayer(player) {
+    const idx = this.players.indexOf(player);
+    this.players.splice(idx, 1);
+    this.emitToAllPlayers("playerLeft", { uid: player.uid });
+  }
+
+  /**
+   * @param {string} type 
+   * @param {*} data 
+   */
   emitToAllPlayers(type, data) {
     this.players.forEach((player) => {
       player.socket.emit("gameUpdate", type, data);

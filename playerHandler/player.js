@@ -46,8 +46,26 @@ export default class Player {
   turnOffline() {
     this.online = false;
     this.socket = null;
+    this.#offlineListeners.forEach((e) => {
+      e();
+    });
+    this.#offlineListeners = [];
     console.log(`Player ${this.uid} is now offline`);
   }
+
+  /**
+   * @callback emptyCallback
+   */
+  /**
+   * @param {emptyCallback} cb
+   */
+  addOfflineListener(cb) {
+    this.#offlineListeners.push(cb);
+  }
+  /**
+   * @type {emptyCallback[]}
+   */
+  #offlineListeners = [];
 
   getJSON() {
     return {

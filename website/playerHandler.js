@@ -19,6 +19,11 @@ export default class PlayerHandler {
       console.log("newPlayer");
       this.players.push(player);
     });
+    this.gameRenderer.on("playerLeft", ({ uid }) => {
+      const player = this.players.find((e) => e.uid == uid);
+      const idx = this.players.indexOf(player);
+      this.players.splice(idx, 1);
+    });
   }
 
   getPlayer(uid) {
