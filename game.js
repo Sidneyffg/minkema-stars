@@ -1,13 +1,20 @@
 import Player from "./playerHandler/player.js";
 
+/**
+ * @callback terminateGameCb
+ */
+
 export default class Game {
   /**
    * @param {Player[]} players
    * @param {*} mapData
+   * @param {string} id
+   * @param {terminateGameCb} terminateCb
    */
-  constructor(players, mapData, id) {
+  constructor(players, mapData, id, terminateCb) {
     this.mapData = mapData;
     this.id = id;
+    this.terminateCb = terminateCb;
     this.phase = "matchmaking";
 
     if (players.length > this.settings.totalPlayers)
@@ -49,6 +56,7 @@ export default class Game {
     player.socket.emit("joinGame", this.getGameData());
     player.addOfflineListener(() => {
       this.removePlayer(player);
+      if (this.players.length == 0) this.terminate();
     });
 
     if (this.players.length == this.settings.totalPlayers) this.startGame();
@@ -76,6 +84,9 @@ export default class Game {
    * @param {Player} player
    */
   removePlayer(player) {
+    if (player.socket) {
+      player.socket.emit("terminate");
+    }
     const idx = this.players.indexOf(player);
     this.players.splice(idx, 1);
     this.emitToAllPlayers("playerLeft", { uid: player.gameData.uid });
@@ -108,6 +119,16 @@ export default class Game {
     this.listeners[type].push(callback);
   }
   listeners = {};
+
+  terminate() {
+    this.players.forEach((e) => this.removePlayer(e));
+    this.terminateCb();
+  }
+
+  /**
+   * @type {terminateGameCb}
+   */
+  terminateCb;
 
   /**
    * @type {"matchmaking"|"ingame"}

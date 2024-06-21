@@ -15,12 +15,7 @@ export default class PlayerHandler {
     PlayerHandler.handleLogin(socket, (player) => {
       socket.on("joinGame", (id) => {
         const game = PlayerHandler.getGame(id);
-        if (!game)
-          return PlayerHandler.newGame(
-            [player],
-            "7f72356e-fe32-488c-8c7a-6bda7f10383f",
-            id
-          );
+        if (!game) return PlayerHandler.newGame([player], "7f72356e-fe32-488c-8c7a-6bda7f10383f", id);
 
         game.addPlayer(player);
       });
@@ -57,18 +52,11 @@ export default class PlayerHandler {
         const name = data.username.split("#")[0];
         const uid = data.username.split("#")[1];
         const player = PlayerHandler.getPlayer({ uid });
-        if (
-          !player ||
-          player.publicData.username !== name ||
-          !player.comparePassword(data.password)
-        )
+        if (!player || player.publicData.username !== name || !player.comparePassword(data.password))
           return PlayerHandler.handleLoginCb(false, cb, successCb, socket);
         return PlayerHandler.handleLoginCb(true, cb, successCb, socket, player);
       } else if (data.type == "signup") {
-        if (
-          !PlayerHandler.isValidUsername(data.username) ||
-          !PlayerHandler.isValidPassword(data.password)
-        )
+        if (!PlayerHandler.isValidUsername(data.username) || !PlayerHandler.isValidPassword(data.password))
           return PlayerHandler.handleLoginCb(false, cb, successCb, socket);
         const player = PlayerHandler.addPlayer(data.username, data.password);
         return PlayerHandler.handleLoginCb(true, cb, successCb, socket, player);
@@ -98,9 +86,24 @@ export default class PlayerHandler {
 
   static newGame(players, mapId, id) {
     const map = MapHandler.getMap(mapId);
-    const game = new Game(players, map, id);
+    const game = new Game(players, map, id, () => {
+      PlayerHandler.terminateGame(game);
+    });
     this.games.push(game);
+    console.log(`Started game ${game.id}`);
     return game;
+  }
+
+  /**
+   * @param {Game} game
+   */
+  static terminateGame(game) {
+    if (game.players.length > 0) {
+      return console.log("Tried terminating game with players left...");
+    }
+    const idx = this.games.indexOf(game);
+    this.games.splice(idx, 1);
+    console.log(`Terminated game ${game.id}`);
   }
 
   static getGame(id) {
@@ -114,12 +117,8 @@ export default class PlayerHandler {
    * @returns {Player | null}
    */
   static getPlayer(data) {
-    if (data.uid)
-      return PlayerHandler.players.find((e) => e.publicData.uid == data.uid);
-    if (data.token)
-      return PlayerHandler.players.find(
-        (e) => e.privateData.token == data.token
-      );
+    if (data.uid) return PlayerHandler.players.find((e) => e.publicData.uid == data.uid);
+    if (data.token) return PlayerHandler.players.find((e) => e.privateData.token == data.token);
     return null;
   }
 
@@ -151,8 +150,7 @@ export default class PlayerHandler {
   static isValidUsername(username, options = {}) {
     if (options.hasUid) {
       const matches = username.match(/[a-zA-Z0-9]{3,15}#[a-zA-NP-Z1-9]{6}/);
-      if (!matches || matches.length != 1 || matches[0] != username)
-        return false;
+      if (!matches || matches.length != 1 || matches[0] != username) return false;
       if (options.playerExists) {
         const name = username.split("#")[0];
         const uid = username.split("#")[1];
