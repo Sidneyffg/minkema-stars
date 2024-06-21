@@ -1,3 +1,4 @@
+import MathcmakingHandler from "./matchmakingHandler.js";
 import PlayerHandler from "./playerHandler.js";
 import Assets from "./assets.js";
 import Time from "./time.js";
@@ -14,32 +15,47 @@ export default class GameRenderer {
     this.canvas = document.querySelector("canvas");
     this.ctx = this.canvas.getContext("2d");
 
-    console.log(data, uid);
     this.playerHandler = new PlayerHandler(this, data.players, this.uid);
-    console.log(this.playerHandler.pos);
 
     this.screenResize();
     window.onresize = () => {
       this.screenResize();
     };
+
     this.socket.on("gameUpdate", (type, data) => {
       const cb = this.listeners[type];
       if (cb) cb(data);
     });
+
+    this.initPhase();
     this.render();
+  }
+
+  initPhase() {
+    this.on("phaseUpdate", ({ newPhase }) => {
+      this.data.phase = newPhase;
+    });
   }
 
   render() {
     requestAnimationFrame(() => {
       this.render();
     });
+
     Time.nextFrame();
-
     this.clearCanvas();
-    this.playerHandler.updatePos();
 
-    this.tileRenderer.render(this.data.map.tiles, this.playerHandler.pos);
-    this.playerHandler.render();
+    switch (this.data.phase) {
+      case "matchmaking":
+        this.matchmakingHandler.render();
+        break;
+      case "ingame":
+        this.playerHandler.updatePos();
+
+        this.tileRenderer.render(this.data.map.tiles, this.playerHandler.pos);
+        this.playerHandler.render();
+        break;
+    }
   }
 
   clearCanvas() {
@@ -74,7 +90,11 @@ export default class GameRenderer {
   }
   listeners = {};
 
+  matchmakingHandler = new MathcmakingHandler(this);
   tileRenderer = new TileRenderer(this);
+  /**
+   * @type {{phase:"matchmaking"|"ingame",mapdata:object,players:array,totalPlayers:number}}
+   */
   data;
 }
 

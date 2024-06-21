@@ -51,21 +51,18 @@ export class Main {
   login() {
     return new Promise((resolve) => {
       const token = this.getToken();
-      if (!token || !this.uid) return resolve(false);
+      const uid = this.uid;
+      if (!token || !uid) return resolve(false);
 
-      this.socket.emit(
-        "init",
-        { type: "tokenLogin", token, uid: this.uid },
-        ({ err, publicData, privateData }) => {
-          if (err) {
-            this.deleteToken();
-            this.deleteUid();
-            return resolve(false);
-          }
-          console.log(publicData, privateData);
-          return resolve(true);
+      this.socket.emit("init", { type: "tokenLogin", token, uid }, ({ err, publicData, privateData }) => {
+        if (err) {
+          this.deleteToken();
+          this.deleteUid();
+          return resolve(false);
         }
-      );
+        console.log(publicData, privateData);
+        return resolve(true);
+      });
     });
   }
 

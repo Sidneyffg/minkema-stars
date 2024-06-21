@@ -106,11 +106,3 @@ export default class PlayerHandler {
   baseSpeed = 0.01;
   playerWidth = 10;
 }
-/*
-this.ctx.fillRect(
-      this.canvas.width / 2 - 5,
-      this.canvas.height / 2 - 5,
-      10,
-      10
-    );
-*/

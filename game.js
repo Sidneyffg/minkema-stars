@@ -8,6 +8,10 @@ export default class Game {
   constructor(players, mapData, id) {
     this.mapData = mapData;
     this.id = id;
+    this.phase = "matchmaking";
+
+    if (players.length > this.settings.totalPlayers)
+      return console.log("More players in game than allowed, aborting game...");
 
     players.forEach((player) => {
       this.initPlayer(player);
@@ -16,6 +20,7 @@ export default class Game {
     this.on("posUpdate", ({ player, data }) => {
       player.gameData.pos.x += data.x;
       player.gameData.pos.y += data.y;
+
       this.emitToAllPlayers("posUpdate", {
         uid: player.gameData.uid,
         newPos: player.gameData.pos,
@@ -45,12 +50,21 @@ export default class Game {
     player.addOfflineListener(() => {
       this.removePlayer(player);
     });
+
+    if (this.players.length == this.settings.totalPlayers) this.startGame();
+  }
+
+  startGame() {
+    this.phase = "ingame";
+    this.emitToAllPlayers("phaseUpdate", { newPhase: "ingame" });
   }
 
   getGameData() {
     return {
       players: this.players.map((e) => e.gameData),
       map: this.mapData,
+      phase: this.phase,
+      totalPlayers: this.settings.totalPlayers,
     };
   }
 
@@ -94,6 +108,14 @@ export default class Game {
     this.listeners[type].push(callback);
   }
   listeners = {};
+
+  /**
+   * @type {"matchmaking"|"ingame"}
+   */
+  phase;
+  settings = {
+    totalPlayers: 2,
+  };
   mapData;
 
   /**
