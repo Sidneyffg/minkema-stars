@@ -64,12 +64,13 @@ export default class GameRenderer {
   }
 
   renderCoords() {
-    this.ctx.textAlign = "right";
-    this.ctx.textBaseline = "alphabetic";
-    this.ctx.font = "20px Roboto";
+    const fontsize = 20;
+    const margin = 5;
+    Utils.setTextStyle(this.ctx, { fontsize, align: "right" });
+
     const x = Math.round(this.playerHandler.pos.x);
     const y = Math.round(this.playerHandler.pos.y);
-    this.ctx.fillText(`(${x}, ${y})`, this.canvas.width - 5, 25);
+    this.ctx.fillText(`(${x}, ${y})`, this.canvas.width - margin, fontsize + margin);
   }
 
   emit(type, data) {

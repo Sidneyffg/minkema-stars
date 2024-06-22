@@ -25,4 +25,25 @@ export default class Utils {
       y: screenCenterPos.y + (pos.y - playerPos.y) * tileSize,
     };
   }
+  /**
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {object} styles
+   * @param {number} styles.fontsize
+   * @param {CanvasTextAlign} [styles.align]
+   * @param {CanvasTextBaseline} [styles.baseline]
+   * @param {string} [styles.font]
+   * @param {string} [styles.color]
+   * @param {boolean} [styles.bold]
+   */
+  static setTextStyle(ctx, { fontsize, align, baseline, font, color, bold }) {
+    align = align ? align : "left";
+    baseline = baseline ? baseline : "alphabetic";
+    font = font ? font : "Roboto";
+    color = color ? color : "black";
+
+    ctx.textAlign = align;
+    ctx.textBaseline = baseline;
+    ctx.fillStyle = color;
+    ctx.font = `${bold ? "bold " : ""}${fontsize}px ${font}`;
+  }
 }
