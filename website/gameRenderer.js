@@ -54,12 +54,22 @@ export default class GameRenderer {
 
         this.tileRenderer.render(this.data.map.tiles, this.playerHandler.pos);
         this.playerHandler.render();
+        this.renderCoords();
         break;
     }
   }
 
   clearCanvas() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+
+  renderCoords() {
+    this.ctx.textAlign = "right";
+    this.ctx.textBaseline = "alphabetic";
+    this.ctx.font = "20px Roboto";
+    const x = Math.round(this.playerHandler.pos.x);
+    const y = Math.round(this.playerHandler.pos.y);
+    this.ctx.fillText(`(${x}, ${y})`, this.canvas.width - 5, 25);
   }
 
   emit(type, data) {
