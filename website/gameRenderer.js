@@ -3,15 +3,14 @@ import PlayerHandler from "./playerHandler.js";
 import Assets from "./assets.js";
 import Time from "./time.js";
 import Utils from "./utils.js";
+import KeyHandler from "./keyHandler.js";
 
 export default class GameRenderer {
-  /**
-   * @param {Renderer} renderer
-   */
-  constructor(uid, socket, data) {
+  constructor(uid, socket, data,terminateCb) {
     this.uid = uid;
     this.socket = socket;
     this.data = data;
+    this.terminateCb = terminateCb;
     this.canvas = document.querySelector("canvas");
     this.ctx = this.canvas.getContext("2d");
 
@@ -28,12 +27,31 @@ export default class GameRenderer {
     });
 
     this.initPhase();
+    this.handleKeys();
+    this.handleTermination();
     this.render();
   }
 
   initPhase() {
     this.on("phaseUpdate", ({ newPhase }) => {
       this.data.phase = newPhase;
+    });
+  }
+
+  handleKeys() {
+    KeyHandler.onKeyPress((key) => {
+      switch (key) {
+        case "Escape":
+          if (this.data.phase == "ingame" && !this.data.openLobby) break;
+          this.emit("leave");
+          break;
+      }
+    });
+  }
+
+  handleTermination() {
+    this.on("terminate", () => {
+      this.terminateCb()
     });
   }
 
@@ -104,9 +122,10 @@ export default class GameRenderer {
   matchmakingHandler = new MathcmakingHandler(this);
   tileRenderer = new TileRenderer(this);
   /**
-   * @type {{phase:"matchmaking"|"ingame",mapdata:object,players:array,totalPlayers:number}}
+   * @type {{phase:"matchmaking"|"ingame",mapdata:object,players:array,totalPlayers:number,openLobby:boolean}}
    */
   data;
+  terminateCb;
 }
 
 class TileRenderer {

@@ -33,6 +33,19 @@ export default class Game {
         newPos: player.gameData.pos,
       });
     });
+
+    this.on("leave", ({ player }) => {
+      switch (this.phase) {
+        case "ingame":
+          if (!this.openLobby) break;
+          this.removePlayer(player);
+          break;
+        case "matchmaking":
+          this.removePlayer(player);
+          break;
+      }
+      if (this.players.length == 0) this.terminate();
+    });
   }
 
   /**
@@ -44,6 +57,7 @@ export default class Game {
       username: player.publicData.username,
       uid: player.publicData.uid,
     };
+
     player.socket.on("gameUpdate", (type, data) => {
       this.listeners[type].forEach((e) => e({ player, data }));
     });
@@ -54,7 +68,7 @@ export default class Game {
     this.players.push(player);
 
     player.socket.emit("joinGame", this.getGameData());
-    player.addOfflineListener(() => {
+    player.gameData.offlineListenerId = player.addOfflineListener(() => {
       this.removePlayer(player);
       if (this.players.length == 0) this.terminate();
     });
@@ -72,6 +86,7 @@ export default class Game {
       players: this.players.map((e) => e.gameData),
       map: this.mapData,
       phase: this.phase,
+      openLobby: this.openLobby,
       totalPlayers: this.settings.totalPlayers,
     };
   }
@@ -85,8 +100,10 @@ export default class Game {
    */
   removePlayer(player) {
     if (player.socket) {
-      player.socket.emit("terminate");
+      this.emitToPlayer(player, "terminate");
+      player.socket.removeAllListeners("gameUpdate");
     }
+    player.removeOfflineListener(player.gameData.offlineListenerId);
     const idx = this.players.indexOf(player);
     this.players.splice(idx, 1);
     this.emitToAllPlayers("playerLeft", { uid: player.gameData.uid });
@@ -99,8 +116,17 @@ export default class Game {
    */
   emitToAllPlayers(type, data) {
     this.players.forEach((player) => {
-      player.socket.emit("gameUpdate", type, data);
+      this.emitToPlayer(player, type, data);
     });
+  }
+
+  /**
+   * @param {Player} player
+   * @param {string} type
+   * @param {*} data
+   */
+  emitToPlayer(player, type, data) {
+    player.socket.emit("gameUpdate", type, data);
   }
 
   /**
@@ -134,8 +160,13 @@ export default class Game {
    * @type {"matchmaking"|"ingame"}
    */
   phase;
+
+  /**
+   * @type {boolean}
+   */
+  openLobby = true;
   settings = {
-    totalPlayers: 2,
+    totalPlayers: 1,
   };
   mapData;
 

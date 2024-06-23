@@ -68,7 +68,9 @@ export class Main {
 
   startGame(gameData) {
     console.log(gameData);
-    this.gameRenderer = new GameRenderer(this.uid, this.socket, gameData);
+    this.gameRenderer = new GameRenderer(this.uid, this.socket, gameData, () => {
+      this.menuRenderer.activate();
+    });
   }
 
   joinGame(id) {

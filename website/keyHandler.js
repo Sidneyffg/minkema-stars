@@ -1,3 +1,5 @@
+import Id from "./id.js";
+
 export default class KeyHandler {
   static init() {
     KeyHandler.listenKeyDown();
@@ -6,11 +8,8 @@ export default class KeyHandler {
   static listenKeyDown() {
     window.addEventListener("keydown", (e) => {
       if (!e.key) return;
-      if (e.key == "Backspace")
-        KeyHandler.callbacks.forEach(({ cb }) => cb(e.key));
       if (KeyHandler.heldDownKeys.includes(e.key)) return;
       KeyHandler.heldDownKeys.push(e.key);
-      if (e.key.length !== 1) return;
       KeyHandler.callbacks.forEach(({ cb }) => cb(e.key));
     });
   }
@@ -21,6 +20,14 @@ export default class KeyHandler {
       KeyHandler.heldDownKeys.splice(idx, 1);
     });
   }
+
+  /**
+   * @callback onKeyPressCb
+   * @param {string} key
+   */
+  /**
+   * @param {onKeyPressCb} cb
+   */
 
   static onKeyPress(cb) {
     const id = Id.new();

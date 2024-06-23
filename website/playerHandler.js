@@ -93,7 +93,7 @@ export default class PlayerHandler {
   #renderPlayer(playerPos, textPos, username) {
     const ctx = this.gameRenderer.ctx;
     ctx.fillRect(playerPos.x, playerPos.y, this.playerWidth, this.playerWidth);
-    Utils.setTextStyle(ctx, { fontsize: 15, align: "center" });
+    Utils.setTextStyle(ctx, { fontsize: 15, align: "center", bold: true });
     ctx.fillText(username, textPos.x, textPos.y);
   }
 

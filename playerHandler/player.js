@@ -34,8 +34,7 @@ export default class Player {
     if (token.length !== this.privateData.token.length) return false;
 
     let isEqual = true;
-    for (let i = 0; i < token.length; i++)
-      if (token.charAt(i) != this.privateData.token.charAt(i)) isEqual = false;
+    for (let i = 0; i < token.length; i++) if (token.charAt(i) != this.privateData.token.charAt(i)) isEqual = false;
 
     return isEqual;
   }
@@ -49,8 +48,8 @@ export default class Player {
   turnOffline() {
     this.online = false;
     this.socket = null;
-    this.#offlineListeners.forEach((e) => {
-      e();
+    this.#offlineListeners.forEach(({ cb }) => {
+      cb();
     });
     this.#offlineListeners = [];
     console.log(`Player ${this.publicData.uid} is now offline`);
@@ -61,12 +60,26 @@ export default class Player {
    */
   /**
    * @param {emptyCallback} cb
+   * @returns {string} id
    */
   addOfflineListener(cb) {
-    this.#offlineListeners.push(cb);
+    const id = uuid();
+    this.#offlineListeners.push({ cb, id });
+    return id;
   }
+
   /**
-   * @type {emptyCallback[]}
+   * @param {string} id
+   */
+  removeOfflineListener(id) {
+    const listener = this.#offlineListeners.find((e) => e.id == id);
+    if (!listener) return console.log("Tried removeing nonexistent offline listner...");
+    const idx = this.#offlineListeners.indexOf(listener);
+    this.#offlineListeners.splice(idx, 1);
+  }
+
+  /**
+   * @type {{cb:emptyCallback[],id:string}[]}
    */
   #offlineListeners = [];
 
@@ -103,8 +116,7 @@ function genNewUid() {
   const uidLength = 6;
 
   let uid = "";
-  for (let i = 0; i < uidLength; i++)
-    uid += chars.charAt(Math.floor(Math.random() * chars.length));
+  for (let i = 0; i < uidLength; i++) uid += chars.charAt(Math.floor(Math.random() * chars.length));
 
   return uid;
 }
