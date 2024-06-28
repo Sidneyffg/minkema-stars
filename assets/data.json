@@ -1,0 +1,15 @@
+{
+  "tiles": [
+    {
+      "fileName": "orange.png",
+      "tileId": 0,
+      "hasCollision": true,
+      "undistructable": true
+    },
+    {
+      "fileName": "red.png",
+      "tileId": 1,
+      "hasCollision": false
+    }
+  ]
+}
