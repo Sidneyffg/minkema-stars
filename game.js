@@ -166,7 +166,7 @@ export default class Game {
    */
   openLobby = true;
   settings = {
-    totalPlayers: 1,
+    totalPlayers: 2,
   };
   mapData;
 

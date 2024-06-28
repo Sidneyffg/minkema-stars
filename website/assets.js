@@ -1,8 +1,8 @@
 export default class Assets {
   static async init() {
     return new Promise(async (resolve, reject) => {
-      const fileNames = await Assets.getAssetsData();
-      await Assets.loadAllAssets(fileNames);
+      const assets = await Assets.getAssetsData();
+      await Assets.loadAllAssets(assets);
       console.log(Assets.assets);
       resolve();
     });
@@ -13,17 +13,31 @@ export default class Assets {
     return data;
   }
 
-  static loadAllAssets(fileNames) {
+  static loadAllAssets(assets) {
     return new Promise(async (resolve, reject) => {
+      const totalAssets = Assets.getTotalAssets(assets);
       let completed = 0;
-      fileNames.forEach(async (fileName) => {
-        const asset = await Assets.loadAsset(`${Assets.assetsPath}/${fileName}`);
-        Assets.assets[fileName.slice(0, -4)] = asset;
-        completed++;
+      Object.keys(assets).forEach((key) => {
+        Assets.assets[key] = [];
+        assets[key].forEach(async (assetData) => {
+          const fileName = `${key}_${assetData.fileName}`;
+          const asset = await Assets.loadAsset(`${Assets.assetsPath}/${fileName}`);
 
-        if (completed == fileNames.length) resolve();
+          Assets.assets[key].push({ asset, ...assetData });
+          completed++;
+
+          if (completed == totalAssets) resolve();
+        });
       });
     });
+  }
+
+  static getTotalAssets(assets) {
+    let totalAssets = 0;
+    Object.keys(assets).forEach((key) => {
+      totalAssets += Object.keys(assets[key]).length;
+    });
+    return totalAssets;
   }
 
   static loadAsset(path) {

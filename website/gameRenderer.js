@@ -6,7 +6,7 @@ import Utils from "./utils.js";
 import KeyHandler from "./keyHandler.js";
 
 export default class GameRenderer {
-  constructor(uid, socket, data,terminateCb) {
+  constructor(uid, socket, data, terminateCb) {
     this.uid = uid;
     this.socket = socket;
     this.data = data;
@@ -51,7 +51,7 @@ export default class GameRenderer {
 
   handleTermination() {
     this.on("terminate", () => {
-      this.terminateCb()
+      this.terminateCb();
     });
   }
 
@@ -153,7 +153,7 @@ class TileRenderer {
   }
 
   drawTileCenter(pos, tileId) {
-    const img = Assets.assets[["tile_orange", "tile_red"][tileId]];
+    const img = Assets.assets.tiles.find((e) => e.tileId == tileId).asset;
     this.gameRenderer.ctx.drawImage(img, pos.x, pos.y, this.tileSize, this.tileSize);
   }
 
