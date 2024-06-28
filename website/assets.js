@@ -20,8 +20,7 @@ export default class Assets {
       Object.keys(assets).forEach((key) => {
         Assets.assets[key] = [];
         assets[key].forEach(async (assetData) => {
-          const fileName = `${key}_${assetData.fileName}`;
-          const asset = await Assets.loadAsset(`${Assets.assetsPath}/${fileName}`);
+          const asset = await Assets.loadAsset(`${Assets.assetsPath}/${assetData.fileName}`);
 
           Assets.assets[key].push({ asset, ...assetData });
           completed++;

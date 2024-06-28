@@ -141,7 +141,7 @@ class TileRenderer {
         this.drawTileCenter(
           Utils.posToTLScreenCoords(
             pos,
-            { x: i, y: j },
+            { x: j, y: i },
             this.gameRenderer.screenCenterPos,
             this.tileSize,
             this.tileSize
@@ -152,8 +152,8 @@ class TileRenderer {
     }
   }
 
-  drawTileCenter(pos, tileId) {
-    const img = Assets.assets.tiles.find((e) => e.tileId == tileId).asset;
+  drawTileCenter(pos, tile) {
+    const img = Assets.assets.tiles.find((e) => e.tileId == tile.tileId).asset;
     this.gameRenderer.ctx.drawImage(img, pos.x, pos.y, this.tileSize, this.tileSize);
   }
 

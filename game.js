@@ -4,6 +4,12 @@ import Player from "./playerHandler/player.js";
  * @callback terminateGameCb
  */
 
+/**
+ * @typedef {object} pos
+ * @property {number} pos.x
+ * @property {number} pos.y
+ */
+
 export default class Game {
   /**
    * @param {Player[]} players
@@ -25,9 +31,13 @@ export default class Game {
     });
 
     this.on("posUpdate", ({ player, data }) => {
-      player.gameData.pos.x += data.x;
-      player.gameData.pos.y += data.y;
+      const newPos = {
+        x: player.gameData.pos.x + data.x,
+        y: player.gameData.pos.y + data.y,
+      };
+      if (!this.isPlayerPosValid(player, newPos)) return;
 
+      player.gameData.pos = newPos;
       this.emitToAllPlayers("posUpdate", {
         uid: player.gameData.uid,
         newPos: player.gameData.pos,
@@ -111,6 +121,50 @@ export default class Game {
   }
 
   /**
+   * @param {Player} player
+   * @param {pos} newPos
+   */
+  isPlayerPosValid(player, newPos) {
+    const halfPlayerWidth = 0.1;
+    const halfPlayerHeight = 0.1;
+    return (
+      this.isPosValid({
+        x: newPos.x + halfPlayerWidth,
+        y: newPos.y + halfPlayerHeight,
+      }) &&
+      this.isPosValid({
+        x: newPos.x + halfPlayerWidth,
+        y: newPos.y - halfPlayerHeight,
+      }) &&
+      this.isPosValid({
+        x: newPos.x - halfPlayerWidth,
+        y: newPos.y + halfPlayerHeight,
+      }) &&
+      this.isPosValid({
+        x: newPos.x - halfPlayerWidth,
+        y: newPos.y - halfPlayerHeight,
+      })
+    );
+  }
+
+  /**
+   * @param {pos} pos
+   */
+  isPosValid(pos) {
+    pos = {
+      x: Math.round(pos.x),
+      y: Math.round(pos.y),
+    };
+
+    const row = this.mapData.tiles[pos.y];
+    if (!row) return false;
+    const tile = row[pos.x];
+    if (!tile) return false;
+
+    return !tile.hasCollision;
+  }
+
+  /**
    * @param {string} type
    * @param {*} data
    */
@@ -168,6 +222,9 @@ export default class Game {
   settings = {
     totalPlayers: 2,
   };
+  /**
+   * @type {import("./maps/mapHandler.js").map}
+   */
   mapData;
 
   /**
