@@ -35,15 +35,13 @@ export default class PlayerHandler {
     const xMov = heldDownKeys.includes("d") * 1 - heldDownKeys.includes("a") * 1;
     const yMov = heldDownKeys.includes("s") * 1 - heldDownKeys.includes("w") * 1;
 
-    let movPos;
+    let angle;
     if (xMov === 0 || yMov === 0) {
       if (xMov === 0 && yMov === 0) return;
-      movPos = {
-        x: xMov * this.baseSpeed * Time.deltaTime,
-        y: yMov * this.baseSpeed * Time.deltaTime,
-      };
+
+      if (xMov) angle = 180 - xMov * 90;
+      else angle = 90 + yMov * 90;
     } else {
-      let angle;
       if (xMov === 1) {
         if (yMov === 1) {
           angle = 135;
@@ -57,17 +55,16 @@ export default class PlayerHandler {
           angle = 315;
         }
       }
-
-      movPos = Utils.angleToCoords(angle, this.baseSpeed * Time.deltaTime);
     }
-
+    const movPos = Utils.angleToCoords(angle, this.baseSpeed * Time.deltaTime);
     const newPos = {
       x: this.pos.x + movPos.x,
       y: this.pos.y + movPos.y,
     };
-    if (!this.isPlayerPosValid(newPos)) return;
 
-    this.updatePosToServer(movPos);
+    if (this.isPlayerPosValid(newPos)) {
+      return this.updatePosToServer(movPos);
+    }
   }
 
   isPlayerPosValid(pos) {

@@ -3,10 +3,11 @@ export default class Utils {
     return num - Math.round(num);
   }
   static angleToCoords(angle, speed) {
+    const decimals = 1e5;
     angle = Utils.toRadians(angle);
     return {
-      x: speed * Math.sin(angle),
-      y: speed * -Math.cos(angle),
+      x: Math.round(speed * Math.sin(angle) * decimals) / decimals,
+      y: Math.round(speed * -Math.cos(angle) * decimals) / decimals,
     };
   }
   static toRadians(angle) {
