@@ -90,7 +90,7 @@ export default class PlayerHandler {
       PlayerHandler.terminateGame(game);
     });
     this.games.push(game);
-    console.log(`Started game ${game.id}`);
+    console.log(`Started game with id ${game.id}`);
     return game;
   }
 
@@ -103,7 +103,7 @@ export default class PlayerHandler {
     }
     const idx = this.games.indexOf(game);
     this.games.splice(idx, 1);
-    console.log(`Terminated game ${game.id}`);
+    console.log(`Terminated game with id "${game.id}"`);
   }
 
   static getGame(id) {

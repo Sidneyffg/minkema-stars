@@ -1,7 +1,7 @@
 import HomePage from "./pages/home.js";
 import LoginPage from "./pages/login.js";
 
-export default class MenuRenderer {
+export default class MenuHandler {
   constructor(main) {
     this.main = main;
     this.loadPages();

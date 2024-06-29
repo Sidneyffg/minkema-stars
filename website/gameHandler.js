@@ -1,11 +1,11 @@
 import MathcmakingHandler from "./matchmakingHandler.js";
 import PlayerHandler from "./playerHandler.js";
-import Assets from "./assets.js";
+import TileHandler from "./tileHandler.js";
 import Time from "./time.js";
 import Utils from "./utils.js";
 import KeyHandler from "./keyHandler.js";
 
-export default class GameRenderer {
+export default class GameHandler {
   constructor(uid, socket, data, terminateCb) {
     this.uid = uid;
     this.socket = socket;
@@ -70,7 +70,7 @@ export default class GameRenderer {
       case "ingame":
         this.playerHandler.updatePos();
 
-        this.tileRenderer.render(this.data.map.tiles, this.playerHandler.pos);
+        this.tileHandler.render(this.data.map.tiles, this.playerHandler.pos);
         this.playerHandler.render();
         this.renderCoords();
         break;
@@ -120,56 +120,10 @@ export default class GameRenderer {
   listeners = {};
 
   matchmakingHandler = new MathcmakingHandler(this);
-  tileRenderer = new TileRenderer(this);
+  tileHandler = new TileHandler(this);
   /**
    * @type {{phase:"matchmaking"|"ingame",mapdata:object,players:array,totalPlayers:number,openLobby:boolean}}
    */
   data;
   terminateCb;
-}
-
-class TileRenderer {
-  constructor(gameRenderer) {
-    this.gameRenderer = gameRenderer;
-    this.gameRenderer.onScreenResize((w, h) => {
-      this.updateTileData(w, h);
-    });
-  }
-  render(tiles, pos) {
-    for (let i = 0; i < tiles.length; i++) {
-      for (let j = 0; j < tiles[0].length; j++) {
-        this.drawTileCenter(
-          Utils.posToTLScreenCoords(
-            pos,
-            { x: j, y: i },
-            this.gameRenderer.screenCenterPos,
-            this.tileSize,
-            this.tileSize
-          ),
-          tiles[i][j]
-        );
-      }
-    }
-  }
-
-  drawTileCenter(pos, tile) {
-    const img = Assets.assets.tiles.find((e) => e.tileId == tile.tileId).asset;
-    this.gameRenderer.ctx.drawImage(img, pos.x, pos.y, this.tileSize, this.tileSize);
-  }
-
-  updateTileData(screenWidth, screenHeight) {
-    this.tileSize = Math.ceil(screenWidth / this.tilesWidth);
-    this.halfTileSize = this.tileSize / 2;
-    this.screenWidth = screenWidth;
-    this.screenHeight = screenHeight;
-  }
-  tileSize;
-  halfTileSize;
-  screenWidth;
-  screenHeight;
-  tilesWidth = 20;
-  /**
-   * @type {GameRenderer}
-   */
-  gameRenderer;
 }

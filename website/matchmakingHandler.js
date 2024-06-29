@@ -1,13 +1,13 @@
 import Utils from "./utils.js";
 
 export default class MathcmakingHandler {
-  constructor(gameRenderer) {
-    this.gameRenderer = gameRenderer;
+  constructor(gameHandler) {
+    this.gameHandler = gameHandler;
   }
 
   render() {
-    const canvas = this.gameRenderer.canvas;
-    const ctx = this.gameRenderer.ctx;
+    const canvas = this.gameHandler.canvas;
+    const ctx = this.gameHandler.ctx;
     ctx.fillStyle = "rgb(14, 76, 192)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -18,14 +18,14 @@ export default class MathcmakingHandler {
 
     Utils.setTextStyle(ctx, { fontsize: 20, align: "center" });
     ctx.fillText(
-      `${this.gameRenderer.data.players.length} of ${this.gameRenderer.data.totalPlayers}`,
+      `${this.gameHandler.data.players.length} of ${this.gameHandler.data.totalPlayers}`,
       halfCanvasWidth,
       500
     );
   }
 
   /**
-   * @type {import("./gameRenderer.js").default}
+   * @type {import("./gameHandler.js").default}
    */
-  gameRenderer;
+  gameHandler;
 }

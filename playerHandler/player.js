@@ -42,7 +42,7 @@ export default class Player {
   turnOnline(socket) {
     this.online = true;
     this.socket = socket;
-    console.log(`Player ${this.publicData.uid} is now online`);
+    console.log(`Player ${this.publicData.uid} (${this.publicData.username}) is now online`);
   }
 
   turnOffline() {
@@ -52,7 +52,7 @@ export default class Player {
       cb();
     });
     this.#offlineListeners = [];
-    console.log(`Player ${this.publicData.uid} is now offline`);
+    console.log(`Player ${this.publicData.uid} (${this.publicData.username}) is now offline`);
   }
 
   /**

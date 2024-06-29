@@ -3,23 +3,23 @@ import Time from "./time.js";
 import Utils from "./utils.js";
 
 export default class PlayerHandler {
-  constructor(gameRenderer, players, uid) {
-    this.gameRenderer = gameRenderer;
+  constructor(gameHandler, players, uid) {
+    this.gameHandler = gameHandler;
     this.players = players;
     console.log(players);
     this.uid = uid;
     this.pos = this.players.find((e) => e.uid == uid).pos;
 
-    this.gameRenderer.on("posUpdate", (data) => {
+    this.gameHandler.on("posUpdate", (data) => {
       const player = this.getPlayer(data.uid);
       player.pos.x = data.newPos.x;
       player.pos.y = data.newPos.y;
     });
-    this.gameRenderer.on("newPlayer", (player) => {
+    this.gameHandler.on("newPlayer", (player) => {
       console.log("newPlayer");
       this.players.push(player);
     });
-    this.gameRenderer.on("playerLeft", ({ uid }) => {
+    this.gameHandler.on("playerLeft", ({ uid }) => {
       const player = this.players.find((e) => e.uid == uid);
       const idx = this.players.indexOf(player);
       this.players.splice(idx, 1);
@@ -63,7 +63,7 @@ export default class PlayerHandler {
   }
 
   updatePosToServer(newPos) {
-    this.gameRenderer.emit("posUpdate", newPos);
+    this.gameHandler.emit("posUpdate", newPos);
   }
 
   render() {
@@ -71,8 +71,8 @@ export default class PlayerHandler {
       const playerPos = Utils.posToTLScreenCoords(
         this.pos,
         player.pos,
-        this.gameRenderer.screenCenterPos,
-        this.gameRenderer.tileRenderer.tileSize,
+        this.gameHandler.screenCenterPos,
+        this.gameHandler.tileHandler.tileSize,
         this.playerWidth
       );
 
@@ -82,8 +82,8 @@ export default class PlayerHandler {
           x: player.pos.x,
           y: player.pos.y,
         },
-        this.gameRenderer.screenCenterPos,
-        this.gameRenderer.tileRenderer.tileSize
+        this.gameHandler.screenCenterPos,
+        this.gameHandler.tileHandler.tileSize
       );
       textPos.y -= 20;
       this.#renderPlayer(playerPos, textPos, player.username);
@@ -91,16 +91,16 @@ export default class PlayerHandler {
   }
 
   #renderPlayer(playerPos, textPos, username) {
-    const ctx = this.gameRenderer.ctx;
+    const ctx = this.gameHandler.ctx;
     ctx.fillRect(playerPos.x, playerPos.y, this.playerWidth, this.playerWidth);
     Utils.setTextStyle(ctx, { fontsize: 15, align: "center", bold: true });
     ctx.fillText(username, textPos.x, textPos.y);
   }
 
   /**
-   * @type {import("./gameRenderer.js").default}
+   * @type {import("./gameHandler.js").default}
    */
-  gameRenderer;
+  gameHandler;
   players;
   baseSpeed = 0.01;
   playerWidth = 10;

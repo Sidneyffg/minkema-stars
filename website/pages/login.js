@@ -1,7 +1,7 @@
 export default class LoginPage {
-  constructor(main, menuRenderer) {
+  constructor(main, menuHandler) {
     this.main = main;
-    this.menuRenderer = menuRenderer;
+    this.menuHandler = menuHandler;
 
     this.appendHtml();
     this.loadElements();
@@ -16,47 +16,37 @@ export default class LoginPage {
     this.elems["login-btn"].addEventListener("click", () => {
       const username = this.elems["login-username"].value;
       if (!this.#isValidUsername(username, { hasUid: true }))
-        return this.menuRenderer.message("error", "Invalid username");
+        return this.menuHandler.message("error", "Invalid username");
       const password = this.elems["login-password"].value;
-      if (!this.#isValidPassword(password))
-        return this.menuRenderer.message("error", "Invalid password");
+      if (!this.#isValidPassword(password)) return this.menuHandler.message("error", "Invalid password");
       this.main.socket.emit(
         "init",
         { type: "usernameLogin", username, password },
         ({ err, publicData, privateData }) => {
-          if (err)
-            return this.menuRenderer.message("error", "Failed to log in");
+          if (err) return this.menuHandler.message("error", "Failed to log in");
 
           this.main.setToken(privateData.token);
           this.main.setUid(publicData.uid);
-          this.menuRenderer.loadPage(this.menuRenderer.homePage);
+          this.menuHandler.loadPage(this.menuHandler.homePage);
         }
       );
     });
 
     this.elems["signup-btn"].addEventListener("click", () => {
       const username = this.elems["signup-username"].value;
-      if (!this.#isValidUsername(username))
-        return this.menuRenderer.message("error", "Invalid username");
+      if (!this.#isValidUsername(username)) return this.menuHandler.message("error", "Invalid username");
       const password = this.elems["signup-password"].value;
-      if (!this.#isValidPassword(password))
-        return this.menuRenderer.message("error", "Invalid password");
+      if (!this.#isValidPassword(password)) return this.menuHandler.message("error", "Invalid password");
       const passwordRepeat = this.elems["signup-password-repeat"].value;
-      if (password !== passwordRepeat)
-        return this.menuRenderer.message("error", "Passwords do not match");
+      if (password !== passwordRepeat) return this.menuHandler.message("error", "Passwords do not match");
 
-      this.main.socket.emit(
-        "init",
-        { type: "signup", username, password },
-        ({ err, publicData, privateData }) => {
-          if (err)
-            return this.menuRenderer.message("error", "Failed to log in");
+      this.main.socket.emit("init", { type: "signup", username, password }, ({ err, publicData, privateData }) => {
+        if (err) return this.menuHandler.message("error", "Failed to log in");
 
-          this.main.setToken(privateData.token);
-          this.main.setUid(publicData.uid);
-          this.menuRenderer.loadPage(this.menuRenderer.homePage);
-        }
-      );
+        this.main.setToken(privateData.token);
+        this.main.setUid(publicData.uid);
+        this.menuHandler.loadPage(this.menuHandler.homePage);
+      });
     });
   }
 
@@ -69,8 +59,7 @@ export default class LoginPage {
   #isValidUsername(username, options = {}) {
     if (options.hasUid) {
       const matches = username.match(/[a-zA-Z0-9]{3,15}#[a-zA-NP-Z1-9]{6}/);
-      if (!matches || matches.length != 1 || matches[0] != username)
-        return false;
+      if (!matches || matches.length != 1 || matches[0] != username) return false;
       return true;
     }
     const matches = username.match(/[a-zA-Z0-9]{3,15}/);

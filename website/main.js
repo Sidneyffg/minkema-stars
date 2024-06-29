@@ -1,5 +1,5 @@
-import GameRenderer from "./gameRenderer.js";
-import MenuRenderer from "./menuRenderer.js";
+import GameHandler from "./gameHandler.js";
+import MenuHandler from "./menuHandler.js";
 import KeyHandler from "./keyHandler.js";
 import Assets from "./assets.js";
 import Time from "./time.js";
@@ -13,12 +13,12 @@ export class Main {
     KeyHandler.init();
     await Assets.init();
 
-    this.menuRenderer = new MenuRenderer(this);
-    this.menuRenderer.activate();
+    this.menuHandler = new MenuHandler(this);
+    this.menuHandler.activate();
 
     this.socket.on("joinGame", (gameData) => {
       this.inGame = true;
-      this.menuRenderer.deactivate();
+      this.menuHandler.deactivate();
       this.startGame(gameData);
     });
   }
@@ -68,8 +68,8 @@ export class Main {
 
   startGame(gameData) {
     console.log(gameData);
-    this.gameRenderer = new GameRenderer(this.uid, this.socket, gameData, () => {
-      this.menuRenderer.activate();
+    this.gameHandler = new GameHandler(this.uid, this.socket, gameData, () => {
+      this.menuHandler.activate();
     });
   }
 
@@ -83,7 +83,7 @@ export class Main {
     });
     Time.nextFrame();
     this.clearCanvas();
-    this.gameRenderer.render(this.ctx);
+    this.gameHandler.render(this.ctx);
   }
 
   inGame = false;
