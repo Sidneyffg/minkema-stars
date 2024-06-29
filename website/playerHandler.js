@@ -35,12 +35,13 @@ export default class PlayerHandler {
     const xMov = heldDownKeys.includes("d") * 1 - heldDownKeys.includes("a") * 1;
     const yMov = heldDownKeys.includes("s") * 1 - heldDownKeys.includes("w") * 1;
 
+    let movPos;
     if (xMov === 0 || yMov === 0) {
       if (xMov === 0 && yMov === 0) return;
-      this.updatePosToServer({
+      movPos = {
         x: xMov * this.baseSpeed * Time.deltaTime,
         y: yMov * this.baseSpeed * Time.deltaTime,
-      });
+      };
     } else {
       let angle;
       if (xMov === 1) {
@@ -57,9 +58,53 @@ export default class PlayerHandler {
         }
       }
 
-      const movPos = Utils.angleToCoords(angle, this.baseSpeed * Time.deltaTime);
-      this.updatePosToServer(movPos);
+      movPos = Utils.angleToCoords(angle, this.baseSpeed * Time.deltaTime);
     }
+
+    const newPos = {
+      x: this.pos.x + movPos.x,
+      y: this.pos.y + movPos.y,
+    };
+    if (!this.isPlayerPosValid(newPos)) return;
+
+    this.updatePosToServer(movPos);
+  }
+
+  isPlayerPosValid(pos) {
+    const halfPlayerWidth = 0.1;
+    const halfPlayerHeight = 0.1;
+    return (
+      this.isPosValid({
+        x: pos.x + halfPlayerWidth,
+        y: pos.y + halfPlayerHeight,
+      }) &&
+      this.isPosValid({
+        x: pos.x + halfPlayerWidth,
+        y: pos.y - halfPlayerHeight,
+      }) &&
+      this.isPosValid({
+        x: pos.x - halfPlayerWidth,
+        y: pos.y + halfPlayerHeight,
+      }) &&
+      this.isPosValid({
+        x: pos.x - halfPlayerWidth,
+        y: pos.y - halfPlayerHeight,
+      })
+    );
+  }
+
+  isPosValid(pos) {
+    pos = {
+      x: Math.round(pos.x),
+      y: Math.round(pos.y),
+    };
+
+    const row = this.gameHandler.data.map.tiles[pos.y];
+    if (!row) return false;
+    const tile = row[pos.x];
+    if (!tile) return false;
+
+    return !tile.hasCollision;
   }
 
   updatePosToServer(newPos) {
@@ -97,6 +142,10 @@ export default class PlayerHandler {
     ctx.fillText(username, textPos.x, textPos.y);
   }
 
+  /**
+   * @type {{x:number,y:number}}
+   */
+  pos;
   /**
    * @type {import("./gameHandler.js").default}
    */

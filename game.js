@@ -35,7 +35,7 @@ export default class Game {
         x: player.gameData.pos.x + data.x,
         y: player.gameData.pos.y + data.y,
       };
-      if (!this.isPlayerPosValid(player, newPos)) return;
+      if (!this.isPlayerPosValid(player, newPos)) return console.log("Rejected posUpdate");
 
       player.gameData.pos = newPos;
       this.emitToAllPlayers("posUpdate", {

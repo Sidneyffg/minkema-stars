@@ -122,7 +122,7 @@ export default class GameHandler {
   matchmakingHandler = new MathcmakingHandler(this);
   tileHandler = new TileHandler(this);
   /**
-   * @type {{phase:"matchmaking"|"ingame",mapdata:object,players:array,totalPlayers:number,openLobby:boolean}}
+   * @type {{phase:"matchmaking"|"ingame",map:object,players:array,totalPlayers:number,openLobby:boolean}}
    */
   data;
   terminateCb;
