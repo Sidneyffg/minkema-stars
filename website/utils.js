@@ -13,11 +13,10 @@ export default class Utils {
   static toRadians(angle) {
     return angle * (Math.PI / 180);
   }
-  static posToTLScreenCoords(playerPos, pos, screenCenterPos, tileSize, w, h) {
-    if (!h) h = w;
+  static posToTLScreenCoords(playerPos, pos, screenCenterPos, tileSize, { x, y }) {
     return {
-      x: screenCenterPos.x + (pos.x - playerPos.x) * tileSize - w * 0.5,
-      y: screenCenterPos.y + (pos.y - playerPos.y) * tileSize - h * 0.5,
+      x: screenCenterPos.x + (pos.x - playerPos.x) * tileSize - x * 0.5,
+      y: screenCenterPos.y + (pos.y - playerPos.y) * tileSize - y * 0.5,
     };
   }
   static posToMiddleScreenCoords(playerPos, pos, screenCenterPos, tileSize) {

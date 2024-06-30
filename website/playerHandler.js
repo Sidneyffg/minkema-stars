@@ -68,24 +68,22 @@ export default class PlayerHandler {
   }
 
   isPlayerPosValid(pos) {
-    const halfPlayerWidth = 0.1;
-    const halfPlayerHeight = 0.1;
     return (
       this.isPosValid({
-        x: pos.x + halfPlayerWidth,
-        y: pos.y + halfPlayerHeight,
+        x: pos.x + this.playerRadius.x,
+        y: pos.y + this.playerRadius.y,
       }) &&
       this.isPosValid({
-        x: pos.x + halfPlayerWidth,
-        y: pos.y - halfPlayerHeight,
+        x: pos.x + this.playerRadius.x,
+        y: pos.y - this.playerRadius.y,
       }) &&
       this.isPosValid({
-        x: pos.x - halfPlayerWidth,
-        y: pos.y + halfPlayerHeight,
+        x: pos.x - this.playerRadius.x,
+        y: pos.y + this.playerRadius.y,
       }) &&
       this.isPosValid({
-        x: pos.x - halfPlayerWidth,
-        y: pos.y - halfPlayerHeight,
+        x: pos.x - this.playerRadius.x,
+        y: pos.y - this.playerRadius.y,
       })
     );
   }
@@ -109,13 +107,17 @@ export default class PlayerHandler {
   }
 
   render() {
+    const tileSize = this.gameHandler.tileHandler.tileSize;
     this.players.forEach((player) => {
       const playerPos = Utils.posToTLScreenCoords(
         this.pos,
         player.pos,
         this.gameHandler.screenCenterPos,
         this.gameHandler.tileHandler.tileSize,
-        this.playerWidth
+        {
+          x: this.playerRadius.x * 2 * tileSize,
+          y: this.playerRadius.y * 2 * tileSize,
+        }
       );
 
       const textPos = Utils.posToMiddleScreenCoords(
@@ -134,7 +136,8 @@ export default class PlayerHandler {
 
   #renderPlayer(playerPos, textPos, username) {
     const ctx = this.gameHandler.ctx;
-    ctx.fillRect(playerPos.x, playerPos.y, this.playerWidth, this.playerWidth);
+    const tileSize = this.gameHandler.tileHandler.tileSize;
+    ctx.fillRect(playerPos.x, playerPos.y, this.playerRadius.x * 2 * tileSize, this.playerRadius.y * 2 * tileSize);
     Utils.setTextStyle(ctx, { fontsize: 15, align: "center", bold: true });
     ctx.fillText(username, textPos.x, textPos.y);
   }
@@ -149,5 +152,8 @@ export default class PlayerHandler {
   gameHandler;
   players;
   baseSpeed = 0.01;
-  playerWidth = 10;
+  playerRadius = {
+    x: 0.1,
+    y: 0.1,
+  };
 }

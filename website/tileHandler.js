@@ -12,13 +12,10 @@ export default class TileHandler {
     for (let i = 0; i < tiles.length; i++) {
       for (let j = 0; j < tiles[0].length; j++) {
         this.drawTileCenter(
-          Utils.posToTLScreenCoords(
-            pos,
-            { x: j, y: i },
-            this.gameHandler.screenCenterPos,
-            this.tileSize,
-            this.tileSize
-          ),
+          Utils.posToTLScreenCoords(pos, { x: j, y: i }, this.gameHandler.screenCenterPos, this.tileSize, {
+            x: this.tileSize,
+            y: this.tileSize,
+          }),
           tiles[i][j]
         );
       }

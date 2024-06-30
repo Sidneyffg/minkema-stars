@@ -125,24 +125,26 @@ export default class Game {
    * @param {pos} newPos
    */
   isPlayerPosValid(player, newPos) {
-    const halfPlayerWidth = 0.1;
-    const halfPlayerHeight = 0.1;
+    const playerRadius = {
+      x: 0.1,
+      y: 0.1,
+    };
     return (
       this.isPosValid({
-        x: newPos.x + halfPlayerWidth,
-        y: newPos.y + halfPlayerHeight,
+        x: newPos.x + playerRadius.x,
+        y: newPos.y + playerRadius.y,
       }) &&
       this.isPosValid({
-        x: newPos.x + halfPlayerWidth,
-        y: newPos.y - halfPlayerHeight,
+        x: newPos.x + playerRadius.x,
+        y: newPos.y - playerRadius.y,
       }) &&
       this.isPosValid({
-        x: newPos.x - halfPlayerWidth,
-        y: newPos.y + halfPlayerHeight,
+        x: newPos.x - playerRadius.x,
+        y: newPos.y + playerRadius.y,
       }) &&
       this.isPosValid({
-        x: newPos.x - halfPlayerWidth,
-        y: newPos.y - halfPlayerHeight,
+        x: newPos.x - playerRadius.x,
+        y: newPos.y - playerRadius.y,
       })
     );
   }
