@@ -4,6 +4,7 @@ import TileHandler from "./tileHandler.js";
 import Time from "./time.js";
 import Utils from "./utils.js";
 import KeyHandler from "./keyHandler.js";
+import Vec2 from "./vec2.js";
 
 export default class GameHandler {
   constructor(uid, socket, data, terminateCb) {
@@ -100,10 +101,11 @@ export default class GameHandler {
     const height = window.innerHeight;
     this.canvas.width = width;
     this.canvas.height = height;
-    this.screenCenterPos = {
+    
+    this.screenCenterPos = new Vec2({
       x: width * 0.5,
       y: height * 0.5,
-    };
+    });
     this.screenResizeListeners.forEach((cb) => {
       cb(width, height);
     });

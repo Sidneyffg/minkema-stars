@@ -1,14 +1,15 @@
 import KeyHandler from "./keyHandler.js";
 import Time from "./time.js";
 import Utils from "./utils.js";
+import Vec2 from "./vec2.js";
 
 export default class PlayerHandler {
   constructor(gameHandler, players, uid) {
     this.gameHandler = gameHandler;
     this.players = players;
-    console.log(players);
     this.uid = uid;
-    this.pos = this.players.find((e) => e.uid == uid).pos;
+
+    this.initPlayers();
 
     this.gameHandler.on("posUpdate", (data) => {
       const player = this.getPlayer(data.uid);
@@ -24,6 +25,13 @@ export default class PlayerHandler {
       const idx = this.players.indexOf(player);
       this.players.splice(idx, 1);
     });
+  }
+
+  initPlayers() {
+    this.players.forEach((e) => {
+      e.pos = new Vec2(e.pos);
+    });
+    this.pos = this.players.find((e) => e.uid == this.uid).pos;
   }
 
   getPlayer(uid) {
@@ -57,42 +65,32 @@ export default class PlayerHandler {
       }
     }
     const movPos = Utils.angleToCoords(angle, this.baseSpeed * Time.deltaTime);
-    const newPos = {
-      x: this.pos.x + movPos.x,
-      y: this.pos.y + movPos.y,
-    };
+    const newPos = new Vec2(this.pos).add(movPos);
 
     if (this.isPlayerPosValid(newPos)) {
       return this.updatePosToServer(movPos);
     }
   }
 
+  /**
+   * @param {Vec2} pos
+   * @returns {boolean}
+   */
   isPlayerPosValid(pos) {
     return (
-      this.isPosValid({
-        x: pos.x + this.playerRadius.x,
-        y: pos.y + this.playerRadius.y,
-      }) &&
-      this.isPosValid({
-        x: pos.x + this.playerRadius.x,
-        y: pos.y - this.playerRadius.y,
-      }) &&
-      this.isPosValid({
-        x: pos.x - this.playerRadius.x,
-        y: pos.y + this.playerRadius.y,
-      }) &&
-      this.isPosValid({
-        x: pos.x - this.playerRadius.x,
-        y: pos.y - this.playerRadius.y,
-      })
+      this.isPosValid(new Vec2(pos).add(this.playerRadius)) &&
+      this.isPosValid(new Vec2(pos).add({ x: this.playerRadius.x, y: -this.playerRadius.y })) &&
+      this.isPosValid(new Vec2(pos).add({ x: -this.playerRadius.x, y: this.playerRadius.y })) &&
+      this.isPosValid(new Vec2(pos).sub(this.playerRadius))
     );
   }
 
+  /**
+   * @param {Vec2} pos
+   * @returns {boolean}
+   */
   isPosValid(pos) {
-    pos = {
-      x: Math.round(pos.x),
-      y: Math.round(pos.y),
-    };
+    pos.round(0);
 
     const row = this.gameHandler.data.map.tiles[pos.y];
     if (!row) return false;
@@ -102,8 +100,11 @@ export default class PlayerHandler {
     return !tile.hasCollision;
   }
 
+  /**
+   * @param {Vec2} newPos
+   */
   updatePosToServer(newPos) {
-    this.gameHandler.emit("posUpdate", newPos);
+    this.gameHandler.emit("posUpdate", newPos.toJSON());
   }
 
   render() {
@@ -114,18 +115,12 @@ export default class PlayerHandler {
         player.pos,
         this.gameHandler.screenCenterPos,
         this.gameHandler.tileHandler.tileSize,
-        {
-          x: this.playerRadius.x * 2 * tileSize,
-          y: this.playerRadius.y * 2 * tileSize,
-        }
+        new Vec2(this.playerRadius).mult(tileSize * 2)
       );
 
       const textPos = Utils.posToMiddleScreenCoords(
         this.pos,
-        {
-          x: player.pos.x,
-          y: player.pos.y,
-        },
+        player.pos,
         this.gameHandler.screenCenterPos,
         this.gameHandler.tileHandler.tileSize
       );
@@ -134,22 +129,31 @@ export default class PlayerHandler {
     });
   }
 
+  /**
+   * @param {Vec2} playerPos
+   * @param {Vec2} textPos
+   * @param {string} username
+   */
   #renderPlayer(playerPos, textPos, username) {
     const ctx = this.gameHandler.ctx;
     const tileSize = this.gameHandler.tileHandler.tileSize;
-    ctx.fillRect(playerPos.x, playerPos.y, this.playerRadius.x * 2 * tileSize, this.playerRadius.y * 2 * tileSize);
+    const relPlayerDiamater = new Vec2(this.playerRadius).mult(tileSize * 2);
+    ctx.fillRect(playerPos.x, playerPos.y, relPlayerDiamater.x, relPlayerDiamater.y);
     Utils.setTextStyle(ctx, { fontsize: 15, align: "center", bold: true });
     ctx.fillText(username, textPos.x, textPos.y);
   }
 
   /**
-   * @type {{x:number,y:number}}
+   * @type {Vec2}
    */
   pos;
   /**
    * @type {import("./gameHandler.js").default}
    */
   gameHandler;
+  /**
+   * @type {{}[]}
+   */
   players;
   baseSpeed = 0.01;
   playerRadius = {
