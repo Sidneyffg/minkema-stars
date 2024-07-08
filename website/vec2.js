@@ -7,15 +7,15 @@ export default class Vec2 {
   }
 
   /**
-   * @param {{x:number,y:number}|Vec2|number} vec
+   * @param {Vec2|number} vec
    */
-  set(val) {
-    if (typeof val == "number") {
-      this.x = val;
-      this.y = val;
+  set(vec) {
+    if (typeof vec == "number") {
+      this.x = vec;
+      this.y = vec;
     } else {
-      this.x = val.x;
-      this.y = val.y;
+      if (typeof vec.x == "number") this.x = vec.x;
+      if (typeof vec.y == "number") this.y = vec.y;
     }
   }
 
@@ -28,10 +28,9 @@ export default class Vec2 {
       if (typeof vec == "number") {
         this.x += vec;
         this.y += vec;
-      }
-      {
-        this.x += vec.x;
-        this.y += vec.y;
+      } else {
+        if (typeof vec.x == "number") this.x += vec.x;
+        if (typeof vec.y == "number") this.y += vec.y;
       }
     });
     return this;
@@ -47,8 +46,8 @@ export default class Vec2 {
         this.x -= vec;
         this.y -= vec;
       } else {
-        this.x -= vec.x;
-        this.y -= vec.y;
+        if (typeof vec.x == "number") this.x -= vec.x;
+        if (typeof vec.y == "number") this.y -= vec.y;
       }
     });
     return this;
@@ -64,8 +63,8 @@ export default class Vec2 {
         this.x *= vec;
         this.y *= vec;
       } else {
-        this.x *= vec.x;
-        this.y *= vec.y;
+        if (typeof vec.x == "number") this.x *= vec.x;
+        if (typeof vec.y == "number") this.y *= vec.y;
       }
     });
     return this;
@@ -81,11 +80,23 @@ export default class Vec2 {
         this.x /= vec;
         this.y /= vec;
       } else {
-        this.x /= vec.x;
-        this.y /= vec.y;
+        if (typeof vec.x == "number") this.x /= vec.x;
+        if (typeof vec.y == "number") this.y /= vec.y;
       }
     });
     return this;
+  }
+
+  /**
+   * @param {Vec2|number} vec
+   * @returns {boolean}
+   */
+  isEqualTo(vec) {
+    if (typeof vec == "number") {
+      return this.x == vec && this.y == vec;
+    } else {
+      return this.x == vec.x && this.y == vec.y;
+    }
   }
 
   /**

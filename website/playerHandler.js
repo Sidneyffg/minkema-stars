@@ -65,11 +65,24 @@ export default class PlayerHandler {
       }
     }
     const movPos = Utils.angleToCoords(angle, this.baseSpeed * Time.deltaTime);
-    const newPos = new Vec2(this.pos).add(movPos);
+    const newXPos = new Vec2(this.pos).add({ x: movPos.x });
+    const newYPos = new Vec2(this.pos).add({ y: movPos.y });
 
-    if (this.isPlayerPosValid(newPos)) {
-      return this.updatePosToServer(movPos);
+    const validMovPos = new Vec2(0);
+    if (this.isPlayerPosValid(newXPos)) {
+      validMovPos.add({ x: movPos.x });
     }
+    if (this.isPlayerPosValid(newYPos)) {
+      validMovPos.add({ y: movPos.y });
+    }
+    if (validMovPos.isEqualTo(0)) return;
+
+    // stuck on corner
+    if (!this.isPlayerPosValid(new Vec2(this.pos).add(validMovPos))) {
+      validMovPos.set({ x: 0 }); // force move down
+    }
+
+    this.updatePosToServer(validMovPos);
   }
 
   /**
